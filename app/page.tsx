@@ -11,6 +11,7 @@ import StatsCards from './components/dashboard/StatsCards';
 import CreditCardGrid from './components/dashboard/CreditCardGrid';
 import AlertsPanel from './components/dashboard/AlertsPanel';
 import CreditCardForm from './components/dashboard/CreditCardForm';
+import { ThemeToggle } from './components/theme-toggle';
 
 export default function Home() {
   const [cards, setCards] = useState<CreditCard[]>([]);
@@ -97,21 +98,24 @@ export default function Home() {
               <h1 className="text-3xl font-bold">Credit Card Portfolio</h1>
               <p className="text-muted-foreground">Manage your credit cards and track your rewards</p>
             </div>
-            <Dialog open={showForm} onOpenChange={setShowForm}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Card
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <CreditCardForm
-                  card={editingCard || undefined}
-                  onSubmit={editingCard ? handleEditCard : handleAddCard}
-                  onCancel={handleCancelForm}
-                />
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <Dialog open={showForm} onOpenChange={setShowForm}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Card
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <CreditCardForm
+                    card={editingCard || undefined}
+                    onSubmit={editingCard ? handleEditCard : handleAddCard}
+                    onCancel={handleCancelForm}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </header>

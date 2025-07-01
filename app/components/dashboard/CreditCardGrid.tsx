@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, CreditCard as CreditCardIcon, DollarSign, Plane } from "lucide-react";
+import UpdateSpendDrawer from './UpdateSpendDrawer';
 
 interface CreditCardGridProps {
   cards: CreditCard[];
@@ -193,19 +194,15 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
 
               {/* Quick Actions */}
               <div className="pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => {
-                    const newSpend = prompt('Enter new spend amount:', card.currentMonthSpend.toString());
-                    if (newSpend !== null) {
-                      onUpdateSpend(card.id, Number(newSpend));
-                    }
-                  }}
-                >
-                  Update Spend
-                </Button>
+                <UpdateSpendDrawer
+                  card={card}
+                  onUpdateSpend={onUpdateSpend}
+                  trigger={
+                    <Button variant="outline" size="sm" className="w-full">
+                      Update Spend
+                    </Button>
+                  }
+                />
               </div>
             </CardContent>
           </Card>
