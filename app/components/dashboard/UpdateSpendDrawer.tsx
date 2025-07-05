@@ -5,8 +5,6 @@ import { CreditCard } from '@/app/types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Drawer,
   DrawerClose,
@@ -17,7 +15,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { CreditCard as CreditCardIcon, DollarSign, Plane } from "lucide-react";
+import { CreditCard as CreditCardIcon, DollarSign, Plane, Minus, Plus } from "lucide-react";
 
 interface UpdateSpendDrawerProps {
   card: CreditCard;
@@ -47,13 +45,6 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: Upda
     }
   };
 
-  const calculateTotalMilesEarned = (spend: number) => {
-    return card.earningRates.reduce((total, rate) => {
-      const earned = spend * rate.rate;
-      return total + earned;
-    }, 0);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newSpend = Number(spendAmount);
@@ -67,9 +58,9 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: Upda
     setSpendAmount(card.currentMonthSpend.toString());
   };
 
-  const currentMiles = calculateTotalMilesEarned(Number(spendAmount) || 0);
-  const previousMiles = calculateTotalMilesEarned(card.currentMonthSpend);
-  const milesDifference = currentMiles - previousMiles;
+  function onClick(adjustment: number) {
+    setSpendAmount((Number(spendAmount) + adjustment).toString());
+  }
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
@@ -86,87 +77,48 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: Upda
           </DrawerHeader>
 
           <div className="p-4">
-            {/* Card Info */}
-            <Card className="mb-6">
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-2">
-                  {getCardTypeIcon(card.cardType)}
-                  <CardTitle className="text-lg">{card.name}</CardTitle>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="secondary">{card.bank}</Badge>
-                  <Badge className={getCardTypeColor(card.cardType)}>
-                    {card.cardType}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Current Spend</p>
-                    <p className="font-semibold">SGD {card.currentMonthSpend.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Current Miles</p>
-                    <p className="font-semibold">{previousMiles.toFixed(0)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Update Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="spendAmount">New Spend Amount (SGD)</Label>
-                <Input
-                  id="spendAmount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={spendAmount}
-                  onChange={(e) => setSpendAmount(e.target.value)}
-                  placeholder="Enter new spend amount"
-                />
-              </div>
-
-              {/* Preview Changes */}
-              {spendAmount && !isNaN(Number(spendAmount)) && (
-                <Card className="bg-muted/50">
-                  <CardContent className="pt-4">
-                    <h4 className="font-medium mb-3">Preview Changes</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>New Spend:</span>
-                        <span className="font-medium">SGD {Number(spendAmount).toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>New Miles:</span>
-                        <span className="font-medium">{currentMiles.toFixed(0)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Miles Change:</span>
-                        <span className={`font-medium ${milesDifference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {milesDifference >= 0 ? '+' : ''}{milesDifference.toFixed(0)}
-                        </span>
+                <div className="p-4 pb-0">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 shrink-0 rounded-full"
+                      onClick={() => onClick(-10)}
+                    >
+                      <Minus />
+                      <span className="sr-only">Decrease</span>
+                    </Button>
+                    <div className="flex-1 text-center">
+                      <Input
+                        type="number"
+                        value={spendAmount}
+                        onChange={(e) => setSpendAmount(e.target.value)}
+                        className="font-bold tracking-tighter text-center border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto w-full"
+                        min="0"
+                        step="1"
+                        max="99999"
+                        placeholder="0"
+                        style={{ fontSize: '4.5rem', lineHeight: '1' }}
+                      />
+                      <div className="text-muted-foreground text-[0.70rem] uppercase">
+                        SGD
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Earning Rates Info */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Earning Rates</Label>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  {card.earningRates.map((rate, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span>{rate.category}</span>
-                      <span>
-                        {rate.rate} {card.cardType === 'miles' ? 'miles/$' : '%'}
-                        {rate.cap && ` (cap: SGD ${rate.cap})`}
-                      </span>
-                    </div>
-                  ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 shrink-0 rounded-full"
+                      onClick={() => onClick(10)}
+                    >
+                      <Plus />
+                      <span className="sr-only">Increase</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </form>
