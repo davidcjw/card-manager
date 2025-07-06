@@ -3,6 +3,7 @@ import { CreditCard, Alert } from '../types';
 class CreditCardStore {
   private cards: CreditCard[] = [];
   private alerts: Alert[] = [];
+  private paidPaymentPeriods: Set<string> = new Set();
 
   constructor() {
     this.loadFromStorage();
@@ -13,6 +14,7 @@ class CreditCardStore {
     if (typeof window !== 'undefined') {
       const storedCards = localStorage.getItem('creditCards');
       const storedAlerts = localStorage.getItem('alerts');
+      const storedPaidPeriods = localStorage.getItem('paidPaymentPeriods');
 
       if (storedCards) {
         this.cards = JSON.parse(storedCards);
@@ -22,6 +24,10 @@ class CreditCardStore {
 
       if (storedAlerts) {
         this.alerts = JSON.parse(storedAlerts);
+      }
+
+      if (storedPaidPeriods) {
+        this.paidPaymentPeriods = new Set(JSON.parse(storedPaidPeriods));
       }
     }
   }
@@ -60,6 +66,7 @@ class CreditCardStore {
     if (typeof window !== 'undefined') {
       localStorage.setItem('creditCards', JSON.stringify(this.cards));
       localStorage.setItem('alerts', JSON.stringify(this.alerts));
+      localStorage.setItem('paidPaymentPeriods', JSON.stringify(Array.from(this.paidPaymentPeriods)));
     }
   }
 
@@ -92,21 +99,27 @@ class CreditCardStore {
       const daysUntilPayment = Math.ceil((paymentDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
       if (daysUntilPayment <= 7 && daysUntilPayment >= 0) {
-        const existingAlert = this.alerts.find(a =>
-          a.cardId === card.id && a.type === 'payment_due' && !a.isRead
-        );
+        // Check if this payment period has already been marked as paid
+        const paymentPeriodKey = this.getPaymentPeriodKey(card, paymentDate);
+        const isPaymentPeriodPaid = this.paidPaymentPeriods.has(paymentPeriodKey);
 
-        if (!existingAlert) {
-          newAlerts.push({
-            id: `payment_${card.id}_${Date.now()}`,
-            cardId: card.id,
-            type: 'payment_due',
-            title: 'Payment Due Soon',
-            message: `Payment for ${card.name} is due in ${daysUntilPayment} days`,
-            dueDate: paymentDate.toISOString(),
-            isRead: false,
-            createdAt: now.toISOString(),
-          });
+        if (!isPaymentPeriodPaid) {
+          const existingAlert = this.alerts.find(a =>
+            a.cardId === card.id && a.type === 'payment_due'
+          );
+
+          if (!existingAlert) {
+            newAlerts.push({
+              id: `payment_${card.id}_${Date.now()}`,
+              cardId: card.id,
+              type: 'payment_due',
+              title: 'Payment Due Soon',
+              message: `Payment for ${card.name} is due in ${daysUntilPayment} days`,
+              dueDate: paymentDate.toISOString(),
+              isRead: false,
+              createdAt: now.toISOString(),
+            });
+          }
         }
       }
 
@@ -116,7 +129,7 @@ class CreditCardStore {
 
       if (daysUntilAnnualFee <= 30 && daysUntilAnnualFee >= 0) {
         const existingAlert = this.alerts.find(a =>
-          a.cardId === card.id && a.type === 'annual_fee' && !a.isRead
+          a.cardId === card.id && a.type === 'annual_fee'
         );
 
         if (!existingAlert) {
@@ -139,7 +152,7 @@ class CreditCardStore {
         const remaining = card.annualFeeWaiver - totalSpend;
         if (remaining <= 1000) { // Alert when within $1000 of waiver
           const existingAlert = this.alerts.find(a =>
-            a.cardId === card.id && a.type === 'fee_waiver' && !a.isRead
+            a.cardId === card.id && a.type === 'fee_waiver'
           );
 
           if (!existingAlert) {
@@ -294,6 +307,33 @@ class CreditCardStore {
     return true;
   }
 
+  markAlertAsPaid(alertId: string): boolean {
+    const alert = this.alerts.find(a => a.id === alertId);
+    if (!alert) return false;
+
+    // For payment due alerts, track the payment period as paid
+    if (alert.type === 'payment_due') {
+      const card = this.cards.find(c => c.id === alert.cardId);
+      if (card) {
+        const paymentPeriodKey = this.getPaymentPeriodKey(card, new Date(alert.dueDate));
+        this.paidPaymentPeriods.add(paymentPeriodKey);
+      }
+    }
+
+    // Remove the alert entirely since the payment has been made
+    const index = this.alerts.findIndex(a => a.id === alertId);
+    if (index === -1) return false;
+
+    this.alerts.splice(index, 1);
+    this.saveToStorage();
+    return true;
+  }
+
+  private getPaymentPeriodKey(card: CreditCard, paymentDate: Date): string {
+    // Create a unique key for this payment period (card + month + year)
+    return `${card.id}_${paymentDate.getFullYear()}_${paymentDate.getMonth()}`;
+  }
+
   // Utility methods
   getTotalSpend(): number {
     return this.cards.reduce((total, card) => total + this.getCardTotalSpend(card), 0);
@@ -304,6 +344,18 @@ class CreditCardStore {
   }
 
   refreshAlerts(): void {
+    this.generateAlerts();
+  }
+
+  // Get paid payment periods
+  getPaidPaymentPeriods(): Set<string> {
+    return new Set(this.paidPaymentPeriods);
+  }
+
+  // Clear paid payment periods (useful for testing or resetting)
+  clearPaidPaymentPeriods(): void {
+    this.paidPaymentPeriods.clear();
+    this.saveToStorage();
     this.generateAlerts();
   }
 }

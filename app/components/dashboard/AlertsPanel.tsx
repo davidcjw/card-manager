@@ -11,9 +11,10 @@ interface AlertsPanelProps {
   cards: CreditCard[];
   onMarkAsRead: (alertId: string) => void;
   onDeleteAlert: (alertId: string) => void;
+  onMarkAsPaid: (alertId: string) => void;
 }
 
-export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert }: AlertsPanelProps) {
+export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert, onMarkAsPaid }: AlertsPanelProps) {
   const getAlertIcon = (type: string) => {
     switch (type) {
       case 'payment_due': return <AlertCircle className="h-4 w-4" />;
@@ -54,7 +55,7 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
     const today = new Date();
     const diffTime = date.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays < 0) {
       return `${Math.abs(diffDays)} days ago`;
     } else if (diffDays === 0) {
@@ -111,9 +112,8 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
         {sortedAlerts.slice(0, 5).map((alert) => (
           <div
             key={alert.id}
-            className={`p-3 rounded-lg border ${getAlertColor(alert.type)} ${
-              alert.isRead ? 'opacity-75' : ''
-            }`}
+            className={`p-3 rounded-lg border ${getAlertColor(alert.type)} ${alert.isRead ? 'opacity-75' : ''
+              }`}
           >
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-3 flex-1">
@@ -134,21 +134,36 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex space-x-1">
                 {!alert.isRead && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onMarkAsRead(alert.id)}
+                    title="Mark as read"
                   >
                     <CheckCircle className="h-4 w-4" />
+                  </Button>
+                )}
+                {alert.type === 'payment_due' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onMarkAsPaid(alert.id)}
+                    title="Mark as paid"
+                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </Button>
                 )}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onDeleteAlert(alert.id)}
+                  title="Delete alert"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -156,7 +171,7 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
             </div>
           </div>
         ))}
-        
+
         {alerts.length > 5 && (
           <div className="text-center pt-2">
             <p className="text-sm text-muted-foreground">

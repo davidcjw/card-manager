@@ -12,9 +12,10 @@ interface CreditCardGridProps {
   onEdit: (card: CreditCard) => void;
   onDelete: (cardId: string) => void;
   onUpdateSpend: (cardId: string, category: string, amount: number) => void;
+  paidPaymentPeriods: Set<string>;
 }
 
-export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend }: CreditCardGridProps) {
+export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend, paidPaymentPeriods }: CreditCardGridProps) {
   const getCardTypeIcon = (type: string) => {
     switch (type) {
       case 'miles': return <Plane className="h-4 w-4" />;
@@ -82,6 +83,12 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
     if (days === 0) return 'Due today';
     if (days === 1) return 'Due tomorrow';
     return `${days} days left`;
+  };
+
+  const isPaymentPeriodPaid = (card: CreditCard) => {
+    const paymentDate = getNextPaymentDate(card);
+    const paymentPeriodKey = `${card.id}_${paymentDate.getFullYear()}_${paymentDate.getMonth()}`;
+    return paidPaymentPeriods.has(paymentPeriodKey);
   };
 
   if (cards.length === 0) {
@@ -186,9 +193,20 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
               {/* Payment Status */}
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Payment Status</p>
-                <Badge className={getPaymentStatusColor(daysUntilPayment)}>
-                  {getPaymentStatusText(daysUntilPayment)}
-                </Badge>
+                {isPaymentPeriodPaid(card) ? (
+                  <div className="flex items-center space-x-2">
+                    <Badge className="bg-green-100 text-green-800">
+                      <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Payment Paid
+                    </Badge>
+                  </div>
+                ) : (
+                  <Badge className={getPaymentStatusColor(daysUntilPayment)}>
+                    {getPaymentStatusText(daysUntilPayment)}
+                  </Badge>
+                )}
               </div>
 
               {/* Earning Rates */}

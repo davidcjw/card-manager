@@ -168,9 +168,10 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                   <Input
                     id="creditLimit"
                     type="number"
-                    value={formData.creditLimit}
-                    onChange={(e) => setFormData({ ...formData, creditLimit: Number(e.target.value) })}
+                    value={formData.creditLimit || ''}
+                    onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value ? Number(e.target.value) : 0 })}
                     className="h-10"
+                    min="0"
                   />
                 </div>
                 <div className="space-y-3">
@@ -178,19 +179,10 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                   <Input
                     id="annualFee"
                     type="number"
-                    value={formData.annualFee}
-                    onChange={(e) => setFormData({ ...formData, annualFee: Number(e.target.value) })}
+                    value={formData.annualFee || ''}
+                    onChange={(e) => setFormData({ ...formData, annualFee: e.target.value ? Number(e.target.value) : 0 })}
                     className="h-10"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <Label htmlFor="annualFeeWaiver" className="text-sm font-medium">Fee Waiver Spend (SGD)</Label>
-                  <Input
-                    id="annualFeeWaiver"
-                    type="number"
-                    value={formData.annualFeeWaiver}
-                    onChange={(e) => setFormData({ ...formData, annualFeeWaiver: Number(e.target.value) })}
-                    className="h-10"
+                    min="0"
                   />
                 </div>
               </div>
@@ -279,8 +271,8 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                     type="number"
                     min="1"
                     max="31"
-                    value={formData.paymentDueDate}
-                    onChange={(e) => setFormData({ ...formData, paymentDueDate: Number(e.target.value) })}
+                    value={formData.paymentDueDate || ''}
+                    onChange={(e) => setFormData({ ...formData, paymentDueDate: e.target.value ? Number(e.target.value) : 15 })}
                     className="h-10"
                   />
                 </div>

@@ -75,6 +75,11 @@ export default function Home() {
     loadData();
   };
 
+  const handleMarkAlertAsPaid = (alertId: string) => {
+    creditCardStore.markAlertAsPaid(alertId);
+    loadData();
+  };
+
   const handleEditCardClick = (card: CreditCard) => {
     setEditingCard(card);
     setShowForm(true);
@@ -143,6 +148,7 @@ export default function Home() {
               cards={cards}
               onMarkAsRead={handleMarkAlertAsRead}
               onDeleteAlert={handleDeleteAlert}
+              onMarkAsPaid={handleMarkAlertAsPaid}
             />
           </div>
 
@@ -185,6 +191,7 @@ export default function Home() {
                   onEdit={handleEditCardClick}
                   onDelete={handleDeleteCard}
                   onUpdateSpend={handleUpdateSpend}
+                  paidPaymentPeriods={creditCardStore.getPaidPaymentPeriods()}
                 />
               </TabsContent>
 
@@ -194,6 +201,7 @@ export default function Home() {
                   onEdit={handleEditCardClick}
                   onDelete={handleDeleteCard}
                   onUpdateSpend={handleUpdateSpend}
+                  paidPaymentPeriods={creditCardStore.getPaidPaymentPeriods()}
                 />
               </TabsContent>
             </Tabs>
