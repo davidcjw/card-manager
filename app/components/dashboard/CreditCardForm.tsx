@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { z } from 'zod';
 import { CreditCard, EarningRate } from '@/app/types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, X, CreditCard as CreditCardIcon, TrendingUp, Calendar, DollarSign } from "lucide-react";
+
+// Validation schema
+const creditCardSchema = z.object({
+  name: z.string().min(1, 'Card name is required').max(100, 'Card name must be less than 100 characters'),
+  bank: z.string().min(1, 'Bank name is required').max(100, 'Bank name must be less than 100 characters'),
+  cardType: z.enum(['miles', 'cashback', 'rewards'], {
+    required_error: 'Card type is required'
+  }),
+  creditLimit: z.number().min(0, 'Credit limit must be 0 or greater'),
+  annualFee: z.number().min(0, 'Annual fee must be 0 or greater'),
+  annualFeeWaiver: z.number().min(0, 'Annual fee waiver must be 0 or greater'),
+  paymentDueDate: z.number().min(1, 'Payment due date must be between 1 and 31').max(31, 'Payment due date must be between 1 and 31'),
+  annualFeeDate: z.string().regex(/^\d{2}-\d{2}$/, 'Annual fee date must be in MM-DD format'),
+  isActive: z.boolean(),
+});
+
+const earningRateSchema = z.object({
+  category: z.string().min(1, 'Category is required'),
+  rate: z.number().min(0.1, 'Rate must be at least 0.1').max(10, 'Rate must be 10 or less'),
+  cap: z.number().optional(),
+});
 
 interface CreditCardFormProps {
   card?: CreditCard;
@@ -35,6 +57,9 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
     card?.earningRates || [{ category: 'General', rate: 1.2, cap: undefined }]
   );
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [earningRateErrors, setEarningRateErrors] = useState<Record<number, Record<string, string>>>({});
+
   const addEarningRate = () => {
     setEarningRates([...earningRates, { category: '', rate: 1.2, cap: undefined }]);
   };
@@ -49,8 +74,52 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
     setEarningRates(earningRates.filter((_, i) => i !== index));
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    const newEarningRateErrors: Record<number, Record<string, string>> = {};
+
+    // Validate main form data
+    try {
+      creditCardSchema.parse(formData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          const field = err.path[0] as string;
+          newErrors[field] = err.message;
+        });
+      }
+    }
+
+    // Validate earning rates
+    earningRates.forEach((rate, index) => {
+      if (rate.category.trim() !== '') {
+        try {
+          earningRateSchema.parse(rate);
+        } catch (error) {
+          if (error instanceof z.ZodError) {
+            newEarningRateErrors[index] = {};
+            error.errors.forEach((err) => {
+              const field = err.path[0] as string;
+              newEarningRateErrors[index][field] = err.message;
+            });
+          }
+        }
+      }
+    });
+
+    setErrors(newErrors);
+    setEarningRateErrors(newEarningRateErrors);
+
+    return Object.keys(newErrors).length === 0 && Object.keys(newEarningRateErrors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     const currentDate = new Date().toISOString().slice(0, 7); // YYYY-MM format
     onSubmit({
       ...formData,
@@ -116,35 +185,60 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
             <TabsContent value="basic" className="space-y-6 mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="name" className="text-sm font-medium">Card Name</Label>
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Card Name <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="name"
-                    required
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      if (errors.name) {
+                        setErrors({ ...errors, name: '' });
+                      }
+                    }}
                     placeholder="e.g., DBS Altitude"
-                    className="h-10"
+                    className={`h-10 ${errors.name ? 'border-red-500' : ''}`}
                   />
+                  {errors.name && (
+                    <p className="text-sm text-red-500">{errors.name}</p>
+                  )}
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="bank" className="text-sm font-medium">Bank</Label>
+                  <Label htmlFor="bank" className="text-sm font-medium">
+                    Bank <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="bank"
-                    required
                     value={formData.bank}
-                    onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, bank: e.target.value });
+                      if (errors.bank) {
+                        setErrors({ ...errors, bank: '' });
+                      }
+                    }}
                     placeholder="e.g., DBS"
-                    className="h-10"
+                    className={`h-10 ${errors.bank ? 'border-red-500' : ''}`}
                   />
+                  {errors.bank && (
+                    <p className="text-sm text-red-500">{errors.bank}</p>
+                  )}
                 </div>
               </div>
               <div className="space-y-3">
-                <Label htmlFor="cardType" className="text-sm font-medium">Card Type</Label>
+                <Label htmlFor="cardType" className="text-sm font-medium">
+                  Card Type <span className="text-red-500">*</span>
+                </Label>
                 <Select
                   value={formData.cardType}
-                  onValueChange={(value) => setFormData({ ...formData, cardType: value as 'miles' | 'cashback' | 'rewards' })}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, cardType: value as 'miles' | 'cashback' | 'rewards' });
+                    if (errors.cardType) {
+                      setErrors({ ...errors, cardType: '' });
+                    }
+                  }}
                 >
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className={`h-10 ${errors.cardType ? 'border-red-500' : ''}`}>
                     <SelectValue placeholder="Select card type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -153,6 +247,9 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                     <SelectItem value="rewards">Rewards</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.cardType && (
+                  <p className="text-sm text-red-500">{errors.cardType}</p>
+                )}
               </div>
               <Alert>
                 <CreditCardIcon className="h-4 w-4" />
@@ -169,10 +266,18 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                     id="creditLimit"
                     type="number"
                     value={formData.creditLimit || ''}
-                    onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value ? Number(e.target.value) : 0 })}
-                    className="h-10"
+                    onChange={(e) => {
+                      setFormData({ ...formData, creditLimit: e.target.value ? Number(e.target.value) : 0 });
+                      if (errors.creditLimit) {
+                        setErrors({ ...errors, creditLimit: '' });
+                      }
+                    }}
+                    className={`h-10 ${errors.creditLimit ? 'border-red-500' : ''}`}
                     min="0"
                   />
+                  {errors.creditLimit && (
+                    <p className="text-sm text-red-500">{errors.creditLimit}</p>
+                  )}
                 </div>
                 <div className="space-y-3">
                   <Label htmlFor="annualFee" className="text-sm font-medium">Annual Fee (SGD)</Label>
@@ -180,10 +285,18 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                     id="annualFee"
                     type="number"
                     value={formData.annualFee || ''}
-                    onChange={(e) => setFormData({ ...formData, annualFee: e.target.value ? Number(e.target.value) : 0 })}
-                    className="h-10"
+                    onChange={(e) => {
+                      setFormData({ ...formData, annualFee: e.target.value ? Number(e.target.value) : 0 });
+                      if (errors.annualFee) {
+                        setErrors({ ...errors, annualFee: '' });
+                      }
+                    }}
+                    className={`h-10 ${errors.annualFee ? 'border-red-500' : ''}`}
                     min="0"
                   />
+                  {errors.annualFee && (
+                    <p className="text-sm text-red-500">{errors.annualFee}</p>
+                  )}
                 </div>
               </div>
               <Alert>
@@ -217,10 +330,23 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                         <Label className="text-sm font-medium">Category</Label>
                         <Input
                           value={rate.category}
-                          onChange={(e) => updateEarningRate(index, 'category', e.target.value)}
+                          onChange={(e) => {
+                            updateEarningRate(index, 'category', e.target.value);
+                            if (earningRateErrors[index]?.category) {
+                              const newErrors = { ...earningRateErrors };
+                              delete newErrors[index]?.category;
+                              if (Object.keys(newErrors[index] || {}).length === 0) {
+                                delete newErrors[index];
+                              }
+                              setEarningRateErrors(newErrors);
+                            }
+                          }}
                           placeholder="e.g., Dining, Travel"
-                          className="h-9"
+                          className={`h-9 ${earningRateErrors[index]?.category ? 'border-red-500' : ''}`}
                         />
+                        {earningRateErrors[index]?.category && (
+                          <p className="text-xs text-red-500">{earningRateErrors[index].category}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Rate</Label>
@@ -228,9 +354,22 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                           type="number"
                           step="0.1"
                           value={rate.rate}
-                          onChange={(e) => updateEarningRate(index, 'rate', Number(e.target.value))}
-                          className="h-9"
+                          onChange={(e) => {
+                            updateEarningRate(index, 'rate', Number(e.target.value));
+                            if (earningRateErrors[index]?.rate) {
+                              const newErrors = { ...earningRateErrors };
+                              delete newErrors[index]?.rate;
+                              if (Object.keys(newErrors[index] || {}).length === 0) {
+                                delete newErrors[index];
+                              }
+                              setEarningRateErrors(newErrors);
+                            }
+                          }}
+                          className={`h-9 ${earningRateErrors[index]?.rate ? 'border-red-500' : ''}`}
                         />
+                        {earningRateErrors[index]?.rate && (
+                          <p className="text-xs text-red-500">{earningRateErrors[index].rate}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Monthly Cap (Optional)</Label>
@@ -266,26 +405,87 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <Label htmlFor="paymentDueDate" className="text-sm font-medium">Payment Due Date (Day of Month)</Label>
-                  <Input
-                    id="paymentDueDate"
-                    type="number"
-                    min="1"
-                    max="31"
-                    value={formData.paymentDueDate || ''}
-                    onChange={(e) => setFormData({ ...formData, paymentDueDate: e.target.value ? Number(e.target.value) : 15 })}
-                    className="h-10"
-                  />
+                  <Select
+                    value={formData.paymentDueDate?.toString() || ''}
+                    onValueChange={(value) => {
+                      setFormData({ ...formData, paymentDueDate: Number(value) });
+                      if (errors.paymentDueDate) {
+                        setErrors({ ...errors, paymentDueDate: '' });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className={`h-10 ${errors.paymentDueDate ? 'border-red-500' : ''}`}>
+                      <SelectValue placeholder="Select day of month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                        <SelectItem key={day} value={day.toString()}>
+                          {day}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.paymentDueDate && (
+                    <p className="text-sm text-red-500">{errors.paymentDueDate}</p>
+                  )}
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="annualFeeDate" className="text-sm font-medium">Annual Fee Date (MM-DD)</Label>
-                  <Input
-                    id="annualFeeDate"
-                    pattern="\d{2}-\d{2}"
-                    value={formData.annualFeeDate}
-                    onChange={(e) => setFormData({ ...formData, annualFeeDate: e.target.value })}
-                    placeholder="01-01"
-                    className="h-10"
-                  />
+                  <Label htmlFor="annualFeeDate" className="text-sm font-medium">Annual Fee Date</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-2 col-span-2">
+                      <Label className="text-xs text-muted-foreground">Month</Label>
+                      <Select
+                        value={formData.annualFeeDate.split('-')[0] || ''}
+                        onValueChange={(month) => {
+                          const day = formData.annualFeeDate.split('-')[1] || '01';
+                          const newDate = `${month}-${day}`;
+                          setFormData({ ...formData, annualFeeDate: newDate });
+                          if (errors.annualFeeDate) {
+                            setErrors({ ...errors, annualFeeDate: '' });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className={`h-10 ${errors.annualFeeDate ? 'border-red-500' : ''}`}>
+                          <SelectValue placeholder="Month" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                            <SelectItem key={month} value={month.toString().padStart(2, '0')}>
+                              {new Date(2024, month - 1).toLocaleDateString('en-US', { month: 'long' })}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Day</Label>
+                      <Select
+                        value={formData.annualFeeDate.split('-')[1] || ''}
+                        onValueChange={(day) => {
+                          const month = formData.annualFeeDate.split('-')[0] || '01';
+                          const newDate = `${month}-${day}`;
+                          setFormData({ ...formData, annualFeeDate: newDate });
+                          if (errors.annualFeeDate) {
+                            setErrors({ ...errors, annualFeeDate: '' });
+                          }
+                        }}
+                      >
+                        <SelectTrigger className={`h-10 ${errors.annualFeeDate ? 'border-red-500' : ''}`}>
+                          <SelectValue placeholder="Day" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                            <SelectItem key={day} value={day.toString().padStart(2, '0')}>
+                              {day}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {errors.annualFeeDate && (
+                    <p className="text-sm text-red-500">{errors.annualFeeDate}</p>
+                  )}
                 </div>
               </div>
               <Alert>
