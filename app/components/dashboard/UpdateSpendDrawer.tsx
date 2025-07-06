@@ -17,6 +17,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Minus, Plus } from "lucide-react";
+import { CONFIG } from '@/app/lib/config';
 
 interface UpdateSpendDrawerProps {
   card: CreditCard;
@@ -101,7 +102,7 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger, initia
         {trigger}
       </DrawerTrigger>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-sm h-[80vh] flex flex-col">
+        <div className={`mx-auto w-full max-w-sm h-[${CONFIG.UI.DRAWER_MAX_HEIGHT}] flex flex-col`}>
           <DrawerHeader>
             <DrawerTitle>Update Card Spend</DrawerTitle>
             <DrawerDescription>
@@ -119,7 +120,7 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger, initia
                     const earningRate = card.earningRates.find(rate => rate.category === spend.category);
                     const earned = earningRate ? (card.cardType === 'cashback'
                       ? spend.amount * earningRate.rate / 100
-                      : spend.amount * earningRate.rate
+                      : (earningRate.cap ? Math.min(spend.amount, earningRate.cap) : spend.amount) * earningRate.rate
                     ) : 0;
 
                     return (
@@ -216,7 +217,7 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger, initia
 
               {/* Quick Amount Buttons */}
               <div className="grid grid-cols-3 gap-2">
-                {[50, 100, 200, 500, 1000, 2000].map((amount) => (
+                {CONFIG.UI.QUICK_SPEND_AMOUNTS.map((amount) => (
                   <Button
                     key={amount}
                     type="button"

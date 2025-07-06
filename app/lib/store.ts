@@ -1,4 +1,5 @@
 import { CreditCard, Alert } from '../types';
+import { CONFIG } from './config';
 
 class CreditCardStore {
   private cards: CreditCard[] = [];
@@ -12,9 +13,9 @@ class CreditCardStore {
 
   private loadFromStorage() {
     if (typeof window !== 'undefined') {
-      const storedCards = localStorage.getItem('creditCards');
-      const storedAlerts = localStorage.getItem('alerts');
-      const storedPaidPeriods = localStorage.getItem('paidPaymentPeriods');
+      const storedCards = localStorage.getItem(CONFIG.STORAGE.CREDIT_CARDS);
+      const storedAlerts = localStorage.getItem(CONFIG.STORAGE.ALERTS);
+      const storedPaidPeriods = localStorage.getItem(CONFIG.STORAGE.PAID_PAYMENT_PERIODS);
 
       if (storedCards) {
         this.cards = JSON.parse(storedCards);
@@ -64,16 +65,16 @@ class CreditCardStore {
 
   private saveToStorage() {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('creditCards', JSON.stringify(this.cards));
-      localStorage.setItem('alerts', JSON.stringify(this.alerts));
-      localStorage.setItem('paidPaymentPeriods', JSON.stringify(Array.from(this.paidPaymentPeriods)));
+      localStorage.setItem(CONFIG.STORAGE.CREDIT_CARDS, JSON.stringify(this.cards));
+      localStorage.setItem(CONFIG.STORAGE.ALERTS, JSON.stringify(this.alerts));
+      localStorage.setItem(CONFIG.STORAGE.PAID_PAYMENT_PERIODS, JSON.stringify(Array.from(this.paidPaymentPeriods)));
     }
   }
 
   // Export data to JSON
   exportData(): string {
     const exportData = {
-      version: '1.0.0',
+      version: CONFIG.EXPORT.DATA_VERSION,
       exportedAt: new Date().toISOString(),
       cards: this.cards,
       alerts: this.alerts,
@@ -141,7 +142,7 @@ class CreditCardStore {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `credit-cards-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = CONFIG.EXPORT.FILENAME_FORMAT.replace('{date}', new Date().toISOString().split('T')[0]);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -178,7 +179,9 @@ class CreditCardStore {
     return card.spendByCategory.reduce((total, spend) => {
       const earningRate = card.earningRates.find(rate => rate.category === spend.category);
       if (earningRate) {
-        return total + (spend.amount * earningRate.rate);
+        // Apply monthly cap if it exists
+        const cappedSpend = earningRate.cap ? Math.min(spend.amount, earningRate.cap) : spend.amount;
+        return total + (cappedSpend * earningRate.rate);
       }
       return total;
     }, 0);
@@ -206,9 +209,9 @@ class CreditCardStore {
 
       // Payment due alerts
       const paymentDate = this.getNextPaymentDate(card);
-      const daysUntilPayment = Math.ceil((paymentDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilPayment = Math.ceil((paymentDate.getTime() - now.getTime()) / CONFIG.TIME.MILLISECONDS_PER_DAY);
 
-      if (daysUntilPayment <= 7 && daysUntilPayment >= 0) {
+      if (daysUntilPayment <= CONFIG.ALERTS.PAYMENT_DUE_DAYS && daysUntilPayment >= 0) {
         // Check if this payment period has already been marked as paid
         const paymentPeriodKey = this.getPaymentPeriodKey(card, paymentDate);
         const isPaymentPeriodPaid = this.paidPaymentPeriods.has(paymentPeriodKey);
@@ -235,9 +238,9 @@ class CreditCardStore {
 
       // Annual fee alerts
       const annualFeeDate = this.getAnnualFeeDate(card);
-      const daysUntilAnnualFee = Math.ceil((annualFeeDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilAnnualFee = Math.ceil((annualFeeDate.getTime() - now.getTime()) / CONFIG.TIME.MILLISECONDS_PER_DAY);
 
-      if (daysUntilAnnualFee <= 30 && daysUntilAnnualFee >= 0) {
+      if (daysUntilAnnualFee <= CONFIG.ALERTS.ANNUAL_FEE_DAYS && daysUntilAnnualFee >= 0) {
         const existingAlert = this.alerts.find(a =>
           a.cardId === card.id && a.type === 'annual_fee'
         );
@@ -260,7 +263,7 @@ class CreditCardStore {
       const totalSpend = this.getCardTotalSpend(card);
       if (card.annualFeeWaiver > 0 && totalSpend < card.annualFeeWaiver) {
         const remaining = card.annualFeeWaiver - totalSpend;
-        if (remaining <= 1000) { // Alert when within $1000 of waiver
+        if (remaining <= CONFIG.ALERTS.FEE_WAIVER_THRESHOLD) { // Alert when within threshold of waiver
           const existingAlert = this.alerts.find(a =>
             a.cardId === card.id && a.type === 'fee_waiver'
           );
@@ -287,8 +290,8 @@ class CreditCardStore {
           if (earningRate && earningRate.cap) {
             const usagePercentage = (spend.amount / earningRate.cap) * 100;
 
-            // Alert when at 80% or more of the monthly cap
-            if (usagePercentage >= 80) {
+            // Alert when at threshold percentage or more of the monthly cap
+            if (usagePercentage >= CONFIG.ALERTS.CATEGORY_LIMIT_PERCENTAGE) {
               const existingAlert = this.alerts.find(a =>
                 a.cardId === card.id &&
                 a.type === 'category_limit' &&
@@ -317,8 +320,8 @@ class CreditCardStore {
       if (card.creditLimit > 0) {
         const creditUtilization = (totalSpend / card.creditLimit) * 100;
 
-        // Alert when at 80% or more of credit limit
-        if (creditUtilization >= 80) {
+        // Alert when at threshold percentage or more of credit limit
+        if (creditUtilization >= CONFIG.ALERTS.CREDIT_LIMIT_PERCENTAGE) {
           const existingAlert = this.alerts.find(a =>
             a.cardId === card.id && a.type === 'credit_limit'
           );

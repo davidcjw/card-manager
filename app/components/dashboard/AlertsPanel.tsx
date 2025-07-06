@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle, X } from "lucide-react";
+import { CONFIG } from '@/app/lib/config';
 
 interface AlertsPanelProps {
   alerts: Alert[];
@@ -60,7 +61,7 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
     const date = new Date(dateString);
     const today = new Date();
     const diffTime = date.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(diffTime / CONFIG.TIME.MILLISECONDS_PER_DAY);
 
     if (diffDays < 0) {
       return `${Math.abs(diffDays)} days ago`;

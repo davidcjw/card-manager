@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, CreditCard as CreditCardIcon, DollarSign, Plane } from "lucide-react";
 import UpdateSpendDrawer from './UpdateSpendDrawer';
+import { CONFIG } from '@/app/lib/config';
 
 interface CreditCardGridProps {
   cards: CreditCard[];
@@ -42,7 +43,9 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
     return card.spendByCategory.reduce((total, spend) => {
       const earningRate = card.earningRates.find(rate => rate.category === spend.category);
       if (earningRate) {
-        return total + (spend.amount * earningRate.rate);
+        // Apply monthly cap if it exists
+        const cappedSpend = earningRate.cap ? Math.min(spend.amount, earningRate.cap) : spend.amount;
+        return total + (cappedSpend * earningRate.rate);
       }
       return total;
     }, 0);
@@ -79,7 +82,7 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
     const paymentDate = getNextPaymentDate(card);
     const today = new Date();
     const diffTime = paymentDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(diffTime / CONFIG.TIME.MILLISECONDS_PER_DAY);
     return diffDays;
   };
 
@@ -191,7 +194,7 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                       const earningRate = card.earningRates.find(rate => rate.category === spend.category);
                       const earned = earningRate ? (card.cardType === 'cashback'
                         ? spend.amount * earningRate.rate / 100
-                        : spend.amount * earningRate.rate
+                        : (earningRate.cap ? Math.min(spend.amount, earningRate.cap) : spend.amount) * earningRate.rate
                       ) : 0;
 
                       return (
