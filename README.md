@@ -1,6 +1,14 @@
-# Credit Card Manager
+# [Credit Card Manager](https://cardmanager.davidcjw.com/)
+
+<p align="center">
+  <img src="/public/credit-manager.gif" alt="Credit Card Manager Demo" width="700" />
+</p>
 
 A comprehensive credit card management application built with Next.js and TypeScript. Track your credit cards, monitor spending, and stay on top of important dates and limits.
+
+No data is collected. Everything is stored in your browser's local storage and you are free to download the data in JSON format to share with others (e.g. your spouse).
+
+Feel free to open an issue [here](https://github.com/davidcjw/card-manager/issues) for bugs or feature requests.
 
 ## Features
 
@@ -38,7 +46,7 @@ The application automatically generates alerts for:
 - Clear all data with confirmation
 - Automatic data persistence in browser storage
 
-## Getting Started
+## Try It Out Yourself!
 
 1. Clone the repository
 2. Install dependencies: `npm install`
@@ -73,20 +81,6 @@ To see the new alert features in action:
 - Mark alerts as read or delete them
 - Mark payment due alerts as paid to track payment history
 - Resolve category and credit limit alerts when you've addressed the issue
-
-## Alert Examples
-
-### Category Limit Alert
-```
-Title: Category Spending Limit Alert
-Message: dining spending on Chase Sapphire Reserve is at 85.0% of monthly cap (SGD 150 remaining)
-```
-
-### Credit Limit Alert
-```
-Title: Credit Limit Alert
-Message: Chase Sapphire Reserve is at 82.5% of credit limit (SGD 1,750 remaining)
-```
 
 ## Technology Stack
 
@@ -132,18 +126,3 @@ interface Alert {
   isRead: boolean;
 }
 ```
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

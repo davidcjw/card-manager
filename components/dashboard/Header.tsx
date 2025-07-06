@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { Plus, Github } from "lucide-react";
 import { ThemeToggle } from '../theme-toggle';
 import { DataManagerModal } from './DataManagerModal';
 import CreditCardForm from './CreditCardForm';
@@ -26,7 +26,17 @@ export default function Header({
     onCancelForm
 }: HeaderProps) {
     return (
-        <header className="border-b">
+        <header className="border-b relative">
+            {/* GitHub Link */}
+            <a
+                href="https://github.com/davidcjw/card-manager"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute right-4 top-2 text-muted-foreground hover:text-primary transition-colors"
+                aria-label="View on GitHub"
+            >
+                <Github className="w-5 h-5" />
+            </a>
             <div className="container mx-auto px-4 py-4 sm:py-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
                     {/* Title Section */}
