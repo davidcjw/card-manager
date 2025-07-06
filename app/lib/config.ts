@@ -34,9 +34,6 @@ export const CONFIG = {
     UI: {
         // Quick spend amounts for the update spend drawer
         QUICK_SPEND_AMOUNTS: [50, 100, 200, 500, 1000, 2000],
-
-        // Maximum height for drawers (in viewport height)
-        DRAWER_MAX_HEIGHT: '80vh',
     },
 
     // Data Export/Import

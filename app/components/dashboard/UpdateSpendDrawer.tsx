@@ -102,15 +102,15 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger, initia
         {trigger}
       </DrawerTrigger>
       <DrawerContent>
-        <div className={`mx-auto w-full max-w-sm h-[${CONFIG.UI.DRAWER_MAX_HEIGHT}] flex flex-col`}>
-          <DrawerHeader>
+        <div className="mx-auto w-full max-w-sm h-[70vh] flex flex-col">
+          <DrawerHeader className="flex-shrink-0">
             <DrawerTitle>Update Card Spend</DrawerTitle>
             <DrawerDescription>
               Select a spending category and update the amount for this credit card.
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 min-h-0">
             {/* Current Spend Summary */}
             {card.spendByCategory && card.spendByCategory.length > 0 && (
               <div className="mb-6 p-4 bg-muted rounded-lg">
