@@ -145,8 +145,8 @@ export default function Home() {
           <div className="lg:col-span-3">
             <Tabs value={cardTypeFilter} onValueChange={(value) => setCardTypeFilter(value as 'all' | 'miles' | 'cashback')} className="w-full">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
-                <div className="w-full overflow-x-auto">
-                  <TabsList className="whitespace-nowrap w-max min-w-full">
+                <div className="w-full">
+                  <TabsList className="flex flex-wrap w-full bg-muted rounded-lg p-[3px] gap-2 justify-start items-center">
                     <TabsTrigger value="all" className="flex items-center space-x-2">
                       <CreditCardIcon className="h-4 w-4" />
                       <span>All Cards</span>
