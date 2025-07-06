@@ -50,6 +50,19 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
     }, 0);
   };
 
+  const calculateTotalCashbackEarned = (card: CreditCard) => {
+    if (!card.spendByCategory || !card.earningRates) return 0;
+
+    return card.spendByCategory.reduce((total, spend) => {
+      const earningRate = card.earningRates.find(rate => rate.category === spend.category);
+      if (earningRate) {
+        // For cashback cards, the rate is a percentage, so divide by 100
+        return total + (spend.amount * earningRate.rate / 100);
+      }
+      return total;
+    }, 0);
+  };
+
   const getNextPaymentDate = (card: CreditCard) => {
     const today = new Date();
     const currentMonth = today.getMonth();
@@ -111,6 +124,7 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
         const daysUntilPayment = getDaysUntilPayment(card);
         const totalSpend = calculateTotalSpend(card);
         const totalMiles = calculateTotalMilesEarned(card);
+        const totalCashback = calculateTotalCashbackEarned(card);
 
         return (
           <Card key={card.id} className="hover:shadow-lg transition-shadow">
@@ -158,8 +172,15 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Miles Earned</p>
-                  <p className="text-lg font-semibold">{totalMiles.toFixed(0)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {card.cardType === 'cashback' ? 'Cashback Earned' : 'Miles Earned'}
+                  </p>
+                  <p className="text-lg font-semibold">
+                    {card.cardType === 'cashback'
+                      ? `SGD ${totalCashback.toFixed(2)}`
+                      : totalMiles.toFixed(0)
+                    }
+                  </p>
                 </div>
               </div>
 
@@ -170,7 +191,10 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                   <div className="space-y-1">
                     {card.spendByCategory.map((spend, index) => {
                       const earningRate = card.earningRates.find(rate => rate.category === spend.category);
-                      const milesEarned = earningRate ? spend.amount * earningRate.rate : 0;
+                      const earned = earningRate ? (card.cardType === 'cashback'
+                        ? spend.amount * earningRate.rate / 100
+                        : spend.amount * earningRate.rate
+                      ) : 0;
 
                       return (
                         <div key={index} className="flex justify-between text-sm">
@@ -180,7 +204,10 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                               SGD {spend.amount.toLocaleString()}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              ({milesEarned.toFixed(0)} miles)
+                              ({card.cardType === 'cashback'
+                                ? `SGD ${earned.toFixed(2)}`
+                                : `${earned.toFixed(0)} miles`
+                              })
                             </span>
                           </div>
                         </div>

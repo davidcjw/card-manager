@@ -184,6 +184,19 @@ class CreditCardStore {
     }, 0);
   }
 
+  private getCardCashbackEarned(card: CreditCard): number {
+    if (!card.spendByCategory || !card.earningRates) return 0;
+
+    return card.spendByCategory.reduce((total, spend) => {
+      const earningRate = card.earningRates.find(rate => rate.category === spend.category);
+      if (earningRate) {
+        // For cashback cards, the rate is a percentage, so divide by 100
+        return total + (spend.amount * earningRate.rate / 100);
+      }
+      return total;
+    }, 0);
+  }
+
   private generateAlerts() {
     const newAlerts: Alert[] = [];
     const now = new Date();
@@ -438,6 +451,24 @@ class CreditCardStore {
 
   getTotalMilesEarned(): number {
     return this.cards.reduce((total, card) => total + this.getCardMilesEarned(card), 0);
+  }
+
+  getTotalCashbackEarned(): number {
+    return this.cards.reduce((total, card) => total + this.getCardCashbackEarned(card), 0);
+  }
+
+  getMilesCardsStats(): { totalSpend: number; totalMiles: number } {
+    const milesCards = this.cards.filter(card => card.cardType === 'miles');
+    const totalSpend = milesCards.reduce((total, card) => total + this.getCardTotalSpend(card), 0);
+    const totalMiles = milesCards.reduce((total, card) => total + this.getCardMilesEarned(card), 0);
+    return { totalSpend, totalMiles };
+  }
+
+  getCashbackCardsStats(): { totalSpend: number; totalCashback: number } {
+    const cashbackCards = this.cards.filter(card => card.cardType === 'cashback');
+    const totalSpend = cashbackCards.reduce((total, card) => total + this.getCardTotalSpend(card), 0);
+    const totalCashback = cashbackCards.reduce((total, card) => total + this.getCardCashbackEarned(card), 0);
+    return { totalSpend, totalCashback };
   }
 
   refreshAlerts(): void {

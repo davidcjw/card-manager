@@ -16,7 +16,8 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
   const [totalSpend, setTotalSpend] = useState(0);
-  const [totalMiles, setTotalMiles] = useState(0);
+  const [milesStats, setMilesStats] = useState({ totalSpend: 0, totalMiles: 0 });
+  const [cashbackStats, setCashbackStats] = useState({ totalSpend: 0, totalCashback: 0 });
 
   useEffect(() => {
     loadData();
@@ -32,7 +33,8 @@ export default function Home() {
     setCards(loadedCards);
     setAlerts(loadedAlerts);
     setTotalSpend(creditCardStore.getTotalSpend());
-    setTotalMiles(creditCardStore.getTotalMilesEarned());
+    setMilesStats(creditCardStore.getMilesCardsStats());
+    setCashbackStats(creditCardStore.getCashbackCardsStats());
   };
 
   const handleAddCard = (cardData: Omit<CreditCard, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -111,11 +113,10 @@ export default function Home() {
             totalCards={cards.length}
             activeCards={activeCards.length}
             totalSpend={totalSpend}
-            totalMiles={totalMiles}
+            milesStats={milesStats}
+            cashbackStats={cashbackStats}
           />
         </div>
-
-
 
         {/* Alerts and Cards */}
         <div className="grid gap-8 lg:grid-cols-4">

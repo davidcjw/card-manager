@@ -94,7 +94,10 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: Upda
                 <div className="space-y-2">
                   {card.spendByCategory.map((spend, index) => {
                     const earningRate = card.earningRates.find(rate => rate.category === spend.category);
-                    const milesEarned = earningRate ? spend.amount * earningRate.rate : 0;
+                    const earned = earningRate ? (card.cardType === 'cashback'
+                      ? spend.amount * earningRate.rate / 100
+                      : spend.amount * earningRate.rate
+                    ) : 0;
 
                     return (
                       <div key={index} className="flex justify-between items-center text-sm">
@@ -102,7 +105,10 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: Upda
                         <div className="flex items-center space-x-2">
                           <span>SGD {spend.amount.toLocaleString()}</span>
                           <span className="text-xs text-muted-foreground">
-                            ({milesEarned.toFixed(0)} miles)
+                            ({card.cardType === 'cashback'
+                              ? `SGD ${earned.toFixed(2)}`
+                              : `${earned.toFixed(0)} miles`
+                            })
                           </span>
                         </div>
                       </div>
