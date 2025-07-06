@@ -144,39 +144,40 @@ export default function Home() {
           {/* Cards Section */}
           <div className="lg:col-span-3">
             <Tabs value={cardTypeFilter} onValueChange={(value) => setCardTypeFilter(value as 'all' | 'miles' | 'cashback')} className="w-full">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                <TabsList className="w-full sm:w-auto">
-                  <TabsTrigger value="all" className="flex items-center space-x-2">
-                    <CreditCardIcon className="h-4 w-4" />
-                    <span>All Cards</span>
-                    {activeCards.length > 0 && (
-                      <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
-                        {activeCards.length}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="miles" className="flex items-center space-x-2">
-                    <CreditCardIcon className="h-4 w-4" />
-                    <span>Miles Cards</span>
-                    {activeCards.filter(card => card.cardType === 'miles').length > 0 && (
-                      <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
-                        {activeCards.filter(card => card.cardType === 'miles').length}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="cashback" className="flex items-center space-x-2">
-                    <CreditCardIcon className="h-4 w-4" />
-                    <span>Cashback Cards</span>
-                    {activeCards.filter(card => card.cardType === 'cashback').length > 0 && (
-                      <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
-                        {activeCards.filter(card => card.cardType === 'cashback').length}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                </TabsList>
-
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div className="w-full overflow-x-auto">
+                  <TabsList className="whitespace-nowrap w-max min-w-full">
+                    <TabsTrigger value="all" className="flex items-center space-x-2">
+                      <CreditCardIcon className="h-4 w-4" />
+                      <span>All Cards</span>
+                      {activeCards.length > 0 && (
+                        <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
+                          {activeCards.length}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger value="miles" className="flex items-center space-x-2">
+                      <CreditCardIcon className="h-4 w-4" />
+                      <span>Miles</span>
+                      {activeCards.filter(card => card.cardType === 'miles').length > 0 && (
+                        <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
+                          {activeCards.filter(card => card.cardType === 'miles').length}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger value="cashback" className="flex items-center space-x-2">
+                      <CreditCardIcon className="h-4 w-4" />
+                      <span>Cashback</span>
+                      {activeCards.filter(card => card.cardType === 'cashback').length > 0 && (
+                        <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
+                          {activeCards.filter(card => card.cardType === 'cashback').length}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
                 {unreadAlerts.length > 0 && (
-                  <div className="flex items-center justify-center sm:justify-start space-x-2 text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-2 sm:mt-0">
                     <AlertCircle className="h-4 w-4" />
                     <span>{unreadAlerts.length} unread alerts</span>
                   </div>
