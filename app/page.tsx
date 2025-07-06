@@ -60,8 +60,8 @@ export default function Home() {
     }
   };
 
-  const handleUpdateSpend = (cardId: string, newSpend: number) => {
-    creditCardStore.updateCardSpend(cardId, newSpend);
+  const handleUpdateSpend = (cardId: string, category: string, amount: number) => {
+    creditCardStore.updateCardSpend(cardId, category, amount);
     loadData();
   };
 

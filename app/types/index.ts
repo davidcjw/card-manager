@@ -3,23 +3,23 @@ export interface CreditCard {
   name: string;
   bank: string;
   cardType: 'miles' | 'cashback' | 'rewards';
-  
+
   // Earning rates
   earningRates: EarningRate[];
-  
+
   // Limits and fees
   creditLimit: number;
   annualFee: number;
   annualFeeWaiver: number; // minimum spend for fee waiver
-  
+
   // Important dates
   paymentDueDate: number; // day of month
   annualFeeDate: string; // MM-DD format
-  
-  // Current month tracking
-  currentMonthSpend: number;
+
+  // Current month tracking - now tracked by category
+  spendByCategory: SpendByCategory[];
   lastResetDate: string; // YYYY-MM format
-  
+
   // Status
   isActive: boolean;
   createdAt: string;
@@ -31,6 +31,11 @@ export interface EarningRate {
   rate: number; // miles per dollar or cashback percentage
   cap?: number; // monthly cap if applicable
   currentMonthEarned?: number;
+}
+
+export interface SpendByCategory {
+  category: string;
+  amount: number;
 }
 
 export interface Alert {

@@ -11,7 +11,7 @@ interface CreditCardGridProps {
   cards: CreditCard[];
   onEdit: (card: CreditCard) => void;
   onDelete: (cardId: string) => void;
-  onUpdateSpend: (cardId: string, newSpend: number) => void;
+  onUpdateSpend: (cardId: string, category: string, amount: number) => void;
 }
 
 export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend }: CreditCardGridProps) {
@@ -33,10 +33,19 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
     }
   };
 
+  const calculateTotalSpend = (card: CreditCard) => {
+    return card.spendByCategory?.reduce((total, spend) => total + spend.amount, 0) || 0;
+  };
+
   const calculateTotalMilesEarned = (card: CreditCard) => {
-    return card.earningRates.reduce((total, rate) => {
-      const earned = card.currentMonthSpend * rate.rate;
-      return total + earned;
+    if (!card.spendByCategory || !card.earningRates) return 0;
+
+    return card.spendByCategory.reduce((total, spend) => {
+      const earningRate = card.earningRates.find(rate => rate.category === spend.category);
+      if (earningRate) {
+        return total + (spend.amount * earningRate.rate);
+      }
+      return total;
     }, 0);
   };
 
@@ -44,13 +53,13 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
-    
+
     let paymentDate = new Date(currentYear, currentMonth, card.paymentDueDate);
-    
+
     if (paymentDate < today) {
       paymentDate = new Date(currentYear, currentMonth + 1, card.paymentDueDate);
     }
-    
+
     return paymentDate;
   };
 
@@ -93,8 +102,9 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {cards.map((card) => {
         const daysUntilPayment = getDaysUntilPayment(card);
+        const totalSpend = calculateTotalSpend(card);
         const totalMiles = calculateTotalMilesEarned(card);
-        
+
         return (
           <Card key={card.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
@@ -130,14 +140,14 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
                 )}
               </div>
             </CardHeader>
-            
+
             <CardContent className="space-y-4">
               {/* Key Metrics */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Current Spend</p>
+                  <p className="text-sm text-muted-foreground">Total Spend</p>
                   <p className="text-lg font-semibold">
-                    SGD {card.currentMonthSpend.toLocaleString()}
+                    SGD {totalSpend.toLocaleString()}
                   </p>
                 </div>
                 <div>
@@ -145,6 +155,33 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
                   <p className="text-lg font-semibold">{totalMiles.toFixed(0)}</p>
                 </div>
               </div>
+
+              {/* Spend by Category */}
+              {card.spendByCategory && card.spendByCategory.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Spend by Category</p>
+                  <div className="space-y-1">
+                    {card.spendByCategory.map((spend, index) => {
+                      const earningRate = card.earningRates.find(rate => rate.category === spend.category);
+                      const milesEarned = earningRate ? spend.amount * earningRate.rate : 0;
+
+                      return (
+                        <div key={index} className="flex justify-between text-sm">
+                          <span className="truncate">{spend.category}</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium">
+                              SGD {spend.amount.toLocaleString()}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              ({milesEarned.toFixed(0)} miles)
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Payment Status */}
               <div className="space-y-2">
@@ -179,15 +216,15 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend 
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Fee Waiver Progress</p>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ 
-                        width: `${Math.min((card.currentMonthSpend / card.annualFeeWaiver) * 100, 100)}%` 
+                      style={{
+                        width: `${Math.min((totalSpend / card.annualFeeWaiver) * 100, 100)}%`
                       }}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {card.currentMonthSpend.toLocaleString()} / {card.annualFeeWaiver.toLocaleString()} SGD
+                    {totalSpend.toLocaleString()} / {card.annualFeeWaiver.toLocaleString()} SGD
                   </p>
                 </div>
               )}

@@ -28,7 +28,6 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
     annualFeeWaiver: card?.annualFeeWaiver || 0,
     paymentDueDate: card?.paymentDueDate || 15,
     annualFeeDate: card?.annualFeeDate || '01-01',
-    currentMonthSpend: card?.currentMonthSpend || 0,
     isActive: card?.isActive ?? true,
   });
 
@@ -57,6 +56,7 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
       ...formData,
       lastResetDate: currentDate,
       earningRates: earningRates.filter(rate => rate.category.trim() !== ''),
+      spendByCategory: card?.spendByCategory || [],
     });
   };
 
@@ -193,16 +193,6 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                     className="h-10"
                   />
                 </div>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="currentMonthSpend" className="text-sm font-medium">Current Month Spend (SGD)</Label>
-                <Input
-                  id="currentMonthSpend"
-                  type="number"
-                  value={formData.currentMonthSpend}
-                  onChange={(e) => setFormData({ ...formData, currentMonthSpend: Number(e.target.value) })}
-                  className="h-10"
-                />
               </div>
               <Alert>
                 <DollarSign className="h-4 w-4" />
