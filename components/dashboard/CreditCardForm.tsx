@@ -323,8 +323,8 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
               <div className="space-y-4">
                 {earningRates.map((rate, index) => (
                   <Card key={index} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-11 gap-2 items-end">
+                      <div className="space-y-2 md:col-span-4">
                         <Label className="text-sm font-medium">Category</Label>
                         <Input
                           value={rate.category}
@@ -346,7 +346,7 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                           <p className="text-xs text-red-500">{earningRateErrors[index].category}</p>
                         )}
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-3">
                         <Label className="text-sm font-medium">Rate</Label>
                         <Input
                           type="number"
@@ -369,8 +369,8 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                           <p className="text-xs text-red-500">{earningRateErrors[index].rate}</p>
                         )}
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-sm font-medium">Monthly Cap (Optional)</Label>
+                      <div className="space-y-2 md:col-span-3">
+                        <Label className="text-sm font-medium">Monthly Cap</Label>
                         <Input
                           type="number"
                           value={rate.cap || ''}
@@ -379,15 +379,17 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                           className="h-9"
                         />
                       </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeEarningRate(index)}
-                        className="h-9"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeEarningRate(index)}
+                          className="h-9 w-9 p-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 ))}
