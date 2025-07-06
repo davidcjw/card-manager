@@ -4,7 +4,7 @@ import { Alert, CreditCard } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle, X } from "lucide-react";
+import { AlertCircle, CheckCircle, X, Eye } from "lucide-react";
 import { CONFIG } from '@/lib/config';
 
 interface AlertsPanelProps {
@@ -119,30 +119,31 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
         {sortedAlerts.slice(0, 5).map((alert) => (
           <div
             key={alert.id}
-            className={`p-3 rounded-lg border ${getAlertColor(alert.type)} ${alert.isRead ? 'opacity-75' : ''
-              }`}
+            className={`p-3 rounded-lg border ${getAlertColor(alert.type)} ${alert.isRead ? 'opacity-75' : ''}`}
           >
             <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-3 flex-1">
+              {/* Content column */}
+              <div className="flex items-start space-x-3 flex-1 min-w-0">
                 {getAlertIcon(alert.type)}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
-                    <h4 className={`font-medium text-sm ${getAlertTextColor(alert.type)}`}>
+                    <h4 className={`font-medium text-sm ${getAlertTextColor(alert.type)} whitespace-normal break-words`}>
                       {alert.title}
                     </h4>
                     {!alert.isRead && (
                       <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground mb-1">{alert.message}</p>
+                  <p className="text-sm text-muted-foreground mb-1 whitespace-normal break-words">{alert.message}</p>
                   <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                    <span>Card: {getCardName(alert.cardId)}</span>
+                    <span className="whitespace-normal break-words">Card: {getCardName(alert.cardId)}</span>
                     <span>Due: {formatDate(alert.dueDate)}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex space-x-1">
+              {/* Actions column */}
+              <div className="flex flex-col space-y-1 items-end ml-2 shrink-0">
                 {!alert.isRead && (
                   <Button
                     variant="ghost"
@@ -150,7 +151,7 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
                     onClick={() => onMarkAsRead(alert.id)}
                     title="Mark as read"
                   >
-                    <CheckCircle className="h-4 w-4" />
+                    <Eye className="h-4 w-4" />
                   </Button>
                 )}
                 {(alert.type === 'payment_due' || alert.type === 'category_limit' || alert.type === 'credit_limit') && (
