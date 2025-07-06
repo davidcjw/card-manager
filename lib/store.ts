@@ -1,5 +1,5 @@
-import { CreditCard, Alert } from '../../types';
-import { CONFIG } from '../../lib/config';
+import { CreditCard, Alert } from '../types';
+import { CONFIG } from './config';
 
 class CreditCardStore {
   private cards: CreditCard[] = [];

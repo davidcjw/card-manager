@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { CreditCard, Alert } from './types';
-import { creditCardStore } from './lib/store';
+import { CreditCard, Alert } from '../types';
+import { creditCardStore } from '../lib/store';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard as CreditCardIcon, AlertCircle } from "lucide-react";
-import StatsCards from './components/dashboard/StatsCards';
-import CreditCardGrid from './components/dashboard/CreditCardGrid';
-import AlertsPanel from './components/dashboard/AlertsPanel';
-import Header from './components/dashboard/Header';
+import StatsCards from '@/components/dashboard/StatsCards';
+import CreditCardGrid from '@/components/dashboard/CreditCardGrid';
+import AlertsPanel from '@/components/dashboard/AlertsPanel';
+import Header from '@/components/dashboard/Header';
 
 export default function Home() {
   const [cards, setCards] = useState<CreditCard[]>([]);

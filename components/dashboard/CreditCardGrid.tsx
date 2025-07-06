@@ -1,12 +1,12 @@
 'use client';
 
-import { CreditCard } from '@/app/types';
+import { CreditCard } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, CreditCard as CreditCardIcon, DollarSign, Plane } from "lucide-react";
 import UpdateSpendDrawer from './UpdateSpendDrawer';
-import { CONFIG } from '@/app/lib/config';
+import { CONFIG } from '@/lib/config';
 
 interface CreditCardGridProps {
   cards: CreditCard[];

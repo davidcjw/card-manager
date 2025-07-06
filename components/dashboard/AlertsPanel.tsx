@@ -1,11 +1,11 @@
 'use client';
 
-import { Alert, CreditCard } from '@/app/types';
+import { Alert, CreditCard } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle, X } from "lucide-react";
-import { CONFIG } from '@/app/lib/config';
+import { CONFIG } from '@/lib/config';
 
 interface AlertsPanelProps {
   alerts: Alert[];

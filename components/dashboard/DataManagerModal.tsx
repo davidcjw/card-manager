@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { creditCardStore } from '@/app/lib/store';
+import { creditCardStore } from '@/lib/store';
 import { Download, Upload, FileText, AlertCircle, Settings, Trash2 } from 'lucide-react';
 
 export function DataManagerModal() {
