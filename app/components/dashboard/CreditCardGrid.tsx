@@ -20,7 +20,6 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
     switch (type) {
       case 'miles': return <Plane className="h-4 w-4" />;
       case 'cashback': return <DollarSign className="h-4 w-4" />;
-      case 'rewards': return <CreditCardIcon className="h-4 w-4" />;
       default: return <CreditCardIcon className="h-4 w-4" />;
     }
   };
@@ -29,7 +28,6 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
     switch (type) {
       case 'miles': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
       case 'cashback': return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'rewards': return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
       default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
     }
   };

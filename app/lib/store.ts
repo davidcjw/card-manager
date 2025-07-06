@@ -279,6 +279,65 @@ class CreditCardStore {
           }
         }
       }
+
+      // Category spending limit alerts
+      if (card.spendByCategory && card.earningRates) {
+        card.spendByCategory.forEach(spend => {
+          const earningRate = card.earningRates.find(rate => rate.category === spend.category);
+          if (earningRate && earningRate.cap) {
+            const usagePercentage = (spend.amount / earningRate.cap) * 100;
+
+            // Alert when at 80% or more of the monthly cap
+            if (usagePercentage >= 80) {
+              const existingAlert = this.alerts.find(a =>
+                a.cardId === card.id &&
+                a.type === 'category_limit' &&
+                a.message.includes(spend.category)
+              );
+
+              if (!existingAlert) {
+                const remaining = earningRate.cap - spend.amount;
+                newAlerts.push({
+                  id: `category_${card.id}_${spend.category}_${Date.now()}`,
+                  cardId: card.id,
+                  type: 'category_limit',
+                  title: 'Category Spending Limit Alert',
+                  message: `${spend.category} spending on ${card.name} is at ${usagePercentage.toFixed(1)}% of monthly cap (SGD ${remaining.toLocaleString()} remaining)`,
+                  dueDate: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
+                  isRead: false,
+                  createdAt: now.toISOString(),
+                });
+              }
+            }
+          }
+        });
+      }
+
+      // Credit limit alerts
+      if (card.creditLimit > 0) {
+        const creditUtilization = (totalSpend / card.creditLimit) * 100;
+
+        // Alert when at 80% or more of credit limit
+        if (creditUtilization >= 80) {
+          const existingAlert = this.alerts.find(a =>
+            a.cardId === card.id && a.type === 'credit_limit'
+          );
+
+          if (!existingAlert) {
+            const remaining = card.creditLimit - totalSpend;
+            newAlerts.push({
+              id: `credit_${card.id}_${Date.now()}`,
+              cardId: card.id,
+              type: 'credit_limit',
+              title: 'Credit Limit Alert',
+              message: `${card.name} is at ${creditUtilization.toFixed(1)}% of credit limit (SGD ${remaining.toLocaleString()} remaining)`,
+              dueDate: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
+              isRead: false,
+              createdAt: now.toISOString(),
+            });
+          }
+        }
+      }
     });
 
     this.alerts = [...this.alerts, ...newAlerts];
@@ -430,7 +489,8 @@ class CreditCardStore {
       }
     }
 
-    // Remove the alert entirely since the payment has been made
+    // For category_limit and credit_limit alerts, just remove them when marked as resolved
+    // For payment_due alerts, remove them since the payment has been made
     const index = this.alerts.findIndex(a => a.id === alertId);
     if (index === -1) return false;
 

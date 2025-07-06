@@ -21,6 +21,8 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
       case 'annual_fee': return <AlertCircle className="h-4 w-4" />;
       case 'spending_cap': return <AlertCircle className="h-4 w-4" />;
       case 'fee_waiver': return <CheckCircle className="h-4 w-4" />;
+      case 'category_limit': return <AlertCircle className="h-4 w-4" />;
+      case 'credit_limit': return <AlertCircle className="h-4 w-4" />;
       default: return <AlertCircle className="h-4 w-4" />;
     }
   };
@@ -31,6 +33,8 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
       case 'annual_fee': return 'border-yellow-200 bg-yellow-50';
       case 'spending_cap': return 'border-blue-200 bg-blue-50';
       case 'fee_waiver': return 'border-green-200 bg-green-50';
+      case 'category_limit': return 'border-orange-200 bg-orange-50';
+      case 'credit_limit': return 'border-red-200 bg-red-50';
       default: return 'border-gray-200 bg-gray-50';
     }
   };
@@ -41,6 +45,8 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
       case 'annual_fee': return 'text-yellow-800';
       case 'spending_cap': return 'text-blue-800';
       case 'fee_waiver': return 'text-green-800';
+      case 'category_limit': return 'text-orange-800';
+      case 'credit_limit': return 'text-red-800';
       default: return 'text-gray-800';
     }
   };
@@ -146,12 +152,12 @@ export default function AlertsPanel({ alerts, cards, onMarkAsRead, onDeleteAlert
                     <CheckCircle className="h-4 w-4" />
                   </Button>
                 )}
-                {alert.type === 'payment_due' && (
+                {(alert.type === 'payment_due' || alert.type === 'category_limit' || alert.type === 'credit_limit') && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onMarkAsPaid(alert.id)}
-                    title="Mark as paid"
+                    title="Mark as resolved"
                     className="text-green-600 hover:text-green-700 hover:bg-green-50"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

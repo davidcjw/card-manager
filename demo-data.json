@@ -1,0 +1,117 @@
+{
+    "version": "1.0.0",
+    "exportedAt": "2024-01-15T10:00:00.000Z",
+    "cards": [
+        {
+            "id": "demo_card_1",
+            "name": "Chase Sapphire Reserve",
+            "bank": "Chase",
+            "cardType": "miles",
+            "creditLimit": 15000,
+            "annualFee": 550,
+            "annualFeeWaiver": 0,
+            "paymentDueDate": 15,
+            "annualFeeDate": "12-01",
+            "spendByCategory": [
+                {
+                    "category": "dining",
+                    "amount": 850
+                },
+                {
+                    "category": "travel",
+                    "amount": 1200
+                }
+            ],
+            "earningRates": [
+                {
+                    "category": "dining",
+                    "rate": 3,
+                    "cap": 1000
+                },
+                {
+                    "category": "travel",
+                    "rate": 3,
+                    "cap": 1500
+                },
+                {
+                    "category": "other",
+                    "rate": 1,
+                    "cap": 0
+                }
+            ],
+            "isActive": true,
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-15T10:00:00.000Z"
+        },
+        {
+            "id": "demo_card_2",
+            "name": "Amex Gold Card",
+            "bank": "American Express",
+            "cardType": "miles",
+            "creditLimit": 8000,
+            "annualFee": 250,
+            "annualFeeWaiver": 5000,
+            "paymentDueDate": 20,
+            "annualFeeDate": "11-15",
+            "spendByCategory": [
+                {
+                    "category": "dining",
+                    "amount": 4000
+                },
+                {
+                    "category": "groceries",
+                    "amount": 2500
+                }
+            ],
+            "earningRates": [
+                {
+                    "category": "dining",
+                    "rate": 4,
+                    "cap": 5000
+                },
+                {
+                    "category": "groceries",
+                    "rate": 4,
+                    "cap": 3000
+                },
+                {
+                    "category": "other",
+                    "rate": 1,
+                    "cap": 0
+                }
+            ],
+            "isActive": true,
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-15T10:00:00.000Z"
+        },
+        {
+            "id": "demo_card_3",
+            "name": "Citi Double Cash",
+            "bank": "Citi",
+            "cardType": "cashback",
+            "creditLimit": 12000,
+            "annualFee": 0,
+            "annualFeeWaiver": 0,
+            "paymentDueDate": 25,
+            "annualFeeDate": "10-01",
+            "spendByCategory": [
+                {
+                    "category": "other",
+                    "amount": 9800
+                }
+            ],
+            "earningRates": [
+                {
+                    "category": "other",
+                    "rate": 2,
+                    "cap": 0
+                }
+            ],
+            "isActive": true,
+            "createdAt": "2024-01-01T00:00:00.000Z",
+            "updatedAt": "2024-01-15T10:00:00.000Z"
+        }
+    ],
+    "alerts": [],
+    "paidPaymentPeriods": []
+}

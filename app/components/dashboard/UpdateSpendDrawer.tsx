@@ -22,10 +22,11 @@ interface UpdateSpendDrawerProps {
   card: CreditCard;
   onUpdateSpend: (cardId: string, category: string, amount: number) => void;
   trigger: React.ReactNode;
+  initialCategory?: string;
 }
 
-export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: UpdateSpendDrawerProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger, initialCategory }: UpdateSpendDrawerProps) {
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || '');
   const [spendAmount, setSpendAmount] = useState('0');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -42,6 +43,23 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: Upda
       setSpendAmount('0');
     }
   }, [selectedCategory, card.spendByCategory]);
+
+  // Handle initial category when drawer opens
+  useEffect(() => {
+    if (isOpen) {
+      if (initialCategory) {
+        setSelectedCategory(initialCategory);
+        const currentSpend = getCurrentSpendForCategory(initialCategory);
+        setSpendAmount(currentSpend.toString());
+      } else if (card.spendByCategory && card.spendByCategory.length > 0) {
+        // Pre-populate with the first existing category
+        const firstCategory = card.spendByCategory[0].category;
+        setSelectedCategory(firstCategory);
+        const currentSpend = getCurrentSpendForCategory(firstCategory);
+        setSpendAmount(currentSpend.toString());
+      }
+    }
+  }, [isOpen, initialCategory, card.spendByCategory]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +88,11 @@ export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: Upda
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
+    // Reset form when closing
+    if (!open) {
+      setSelectedCategory('');
+      setSpendAmount('0');
+    }
   };
 
   return (

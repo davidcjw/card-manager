@@ -17,7 +17,7 @@ import { Plus, X, CreditCard as CreditCardIcon, TrendingUp, Calendar, DollarSign
 const creditCardSchema = z.object({
   name: z.string().min(1, 'Card name is required').max(100, 'Card name must be less than 100 characters'),
   bank: z.string().min(1, 'Bank name is required').max(100, 'Bank name must be less than 100 characters'),
-  cardType: z.enum(['miles', 'cashback', 'rewards'], {
+  cardType: z.enum(['miles', 'cashback'], {
     required_error: 'Card type is required'
   }),
   creditLimit: z.number().min(0, 'Credit limit must be 0 or greater'),
@@ -133,7 +133,6 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
     switch (type) {
       case 'miles': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'cashback': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'rewards': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
@@ -232,7 +231,7 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                 <Select
                   value={formData.cardType}
                   onValueChange={(value) => {
-                    setFormData({ ...formData, cardType: value as 'miles' | 'cashback' | 'rewards' });
+                    setFormData({ ...formData, cardType: value as 'miles' | 'cashback' });
                     if (errors.cardType) {
                       setErrors({ ...errors, cardType: '' });
                     }
@@ -244,7 +243,6 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                   <SelectContent>
                     <SelectItem value="miles">Miles</SelectItem>
                     <SelectItem value="cashback">Cashback</SelectItem>
-                    <SelectItem value="rewards">Rewards</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.cardType && (

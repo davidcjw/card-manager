@@ -2,7 +2,7 @@ export interface CreditCard {
   id: string;
   name: string;
   bank: string;
-  cardType: 'miles' | 'cashback' | 'rewards';
+  cardType: 'miles' | 'cashback';
 
   // Earning rates
   earningRates: EarningRate[];
@@ -41,7 +41,7 @@ export interface SpendByCategory {
 export interface Alert {
   id: string;
   cardId: string;
-  type: 'payment_due' | 'annual_fee' | 'spending_cap' | 'fee_waiver';
+  type: 'payment_due' | 'annual_fee' | 'spending_cap' | 'fee_waiver' | 'category_limit' | 'credit_limit';
   title: string;
   message: string;
   dueDate: string;
