@@ -128,7 +128,7 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
         const totalCashback = calculateTotalCashbackEarned(card);
 
         return (
-          <Card key={card.id} className="hover:shadow-lg transition-shadow">
+          <Card key={card.id} className="hover:shadow-lg transition-shadow flex flex-col">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -163,7 +163,7 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 flex-1 flex flex-col">
               {/* Key Metrics */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -275,8 +275,8 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                 </div>
               )}
 
-              {/* Quick Actions */}
-              <div className="pt-2">
+              {/* Quick Actions - pushed to bottom */}
+              <div className="mt-auto pt-4">
                 <UpdateSpendDrawer
                   card={card}
                   onUpdateSpend={onUpdateSpend}

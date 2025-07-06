@@ -31,7 +31,7 @@ export default function Header({
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
                     {/* Title Section */}
                     <div className="text-center sm:text-left">
-                        <h1 className="text-2xl sm:text-3xl font-bold">Credit Card Portfolio</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold">Credit Card Manager</h1>
                         <p className="text-sm sm:text-base text-muted-foreground mt-1">
                             Manage your credit cards and track your rewards
                         </p>
