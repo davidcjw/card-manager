@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { CreditCard } from '@/app/types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Drawer,
   DrawerClose,
@@ -15,7 +14,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { CreditCard as CreditCardIcon, DollarSign, Plane, Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 
 interface UpdateSpendDrawerProps {
   card: CreditCard;
@@ -26,24 +25,6 @@ interface UpdateSpendDrawerProps {
 export default function UpdateSpendDrawer({ card, onUpdateSpend, trigger }: UpdateSpendDrawerProps) {
   const [spendAmount, setSpendAmount] = useState(card.currentMonthSpend.toString());
   const [isOpen, setIsOpen] = useState(false);
-
-  const getCardTypeIcon = (type: string) => {
-    switch (type) {
-      case 'miles': return <Plane className="h-4 w-4" />;
-      case 'cashback': return <DollarSign className="h-4 w-4" />;
-      case 'rewards': return <CreditCardIcon className="h-4 w-4" />;
-      default: return <CreditCardIcon className="h-4 w-4" />;
-    }
-  };
-
-  const getCardTypeColor = (type: string) => {
-    switch (type) {
-      case 'miles': return 'bg-blue-100 text-blue-800';
-      case 'cashback': return 'bg-green-100 text-green-800';
-      case 'rewards': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
