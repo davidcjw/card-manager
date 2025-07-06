@@ -18,6 +18,7 @@ export default function Home() {
   const [totalSpend, setTotalSpend] = useState(0);
   const [milesStats, setMilesStats] = useState({ totalSpend: 0, totalMiles: 0 });
   const [cashbackStats, setCashbackStats] = useState({ totalSpend: 0, totalCashback: 0 });
+  const [cardTypeFilter, setCardTypeFilter] = useState<'all' | 'miles' | 'cashback'>('all');
 
   useEffect(() => {
     loadData();
@@ -90,8 +91,17 @@ export default function Home() {
   };
 
   const activeCards = cards.filter(card => card.isActive);
-  const inactiveCards = cards.filter(card => !card.isActive);
   const unreadAlerts = alerts.filter(alert => !alert.isRead);
+
+  // Filter cards based on card type
+  const getFilteredCards = () => {
+    if (cardTypeFilter === 'all') {
+      return activeCards;
+    }
+    return activeCards.filter(card => card.cardType === cardTypeFilter);
+  };
+
+  const filteredCards = getFilteredCards();
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,24 +143,33 @@ export default function Home() {
 
           {/* Cards Section */}
           <div className="lg:col-span-3">
-            <Tabs defaultValue="active" className="w-full">
+            <Tabs value={cardTypeFilter} onValueChange={(value) => setCardTypeFilter(value as 'all' | 'miles' | 'cashback')} className="w-full">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                 <TabsList className="w-full sm:w-auto">
-                  <TabsTrigger value="active" className="flex items-center space-x-2">
+                  <TabsTrigger value="all" className="flex items-center space-x-2">
                     <CreditCardIcon className="h-4 w-4" />
-                    <span>Active Cards</span>
+                    <span>All Cards</span>
                     {activeCards.length > 0 && (
                       <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
                         {activeCards.length}
                       </span>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="inactive" className="flex items-center space-x-2">
+                  <TabsTrigger value="miles" className="flex items-center space-x-2">
                     <CreditCardIcon className="h-4 w-4" />
-                    <span>Inactive Cards</span>
-                    {inactiveCards.length > 0 && (
-                      <span className="ml-1 bg-muted text-muted-foreground text-xs rounded-full px-2 py-1">
-                        {inactiveCards.length}
+                    <span>Miles Cards</span>
+                    {activeCards.filter(card => card.cardType === 'miles').length > 0 && (
+                      <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
+                        {activeCards.filter(card => card.cardType === 'miles').length}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="cashback" className="flex items-center space-x-2">
+                    <CreditCardIcon className="h-4 w-4" />
+                    <span>Cashback Cards</span>
+                    {activeCards.filter(card => card.cardType === 'cashback').length > 0 && (
+                      <span className="ml-1 bg-primary text-primary-foreground text-xs rounded-full px-2 py-1">
+                        {activeCards.filter(card => card.cardType === 'cashback').length}
                       </span>
                     )}
                   </TabsTrigger>
@@ -164,9 +183,9 @@ export default function Home() {
                 )}
               </div>
 
-              <TabsContent value="active" className="space-y-4">
+              <TabsContent value="all" className="space-y-4">
                 <CreditCardGrid
-                  cards={activeCards}
+                  cards={filteredCards}
                   onEdit={handleEditCardClick}
                   onDelete={handleDeleteCard}
                   onUpdateSpend={handleUpdateSpend}
@@ -174,9 +193,19 @@ export default function Home() {
                 />
               </TabsContent>
 
-              <TabsContent value="inactive" className="space-y-4">
+              <TabsContent value="miles" className="space-y-4">
                 <CreditCardGrid
-                  cards={inactiveCards}
+                  cards={filteredCards}
+                  onEdit={handleEditCardClick}
+                  onDelete={handleDeleteCard}
+                  onUpdateSpend={handleUpdateSpend}
+                  paidPaymentPeriods={creditCardStore.getPaidPaymentPeriods()}
+                />
+              </TabsContent>
+
+              <TabsContent value="cashback" className="space-y-4">
+                <CreditCardGrid
+                  cards={filteredCards}
                   onEdit={handleEditCardClick}
                   onDelete={handleDeleteCard}
                   onUpdateSpend={handleUpdateSpend}
