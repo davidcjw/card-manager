@@ -96,21 +96,21 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
         <form onSubmit={handleSubmit}>
           <Tabs defaultValue="basic" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="basic" className="flex items-center gap-2">
-                <CreditCardIcon className="h-4 w-4" />
-                Basic Info
+              <TabsTrigger value="basic" className="flex items-center gap-1 text-xs">
+                <CreditCardIcon className="h-3 w-3" />
+                Basic
               </TabsTrigger>
-              <TabsTrigger value="limits" className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Limits & Fees
+              <TabsTrigger value="limits" className="flex items-center gap-1 text-xs">
+                <DollarSign className="h-3 w-3" />
+                Limits
               </TabsTrigger>
-              <TabsTrigger value="rates" className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Earning Rates
+              <TabsTrigger value="rates" className="flex items-center gap-1 text-xs">
+                <TrendingUp className="h-3 w-3" />
+                Rates
               </TabsTrigger>
-              <TabsTrigger value="dates" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Important Dates
+              <TabsTrigger value="dates" className="flex items-center gap-1 text-xs">
+                <Calendar className="h-3 w-3" />
+                Dates
               </TabsTrigger>
             </TabsList>
             <TabsContent value="basic" className="space-y-6 mt-6">

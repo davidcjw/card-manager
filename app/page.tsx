@@ -31,7 +31,7 @@ export default function Home() {
   const loadData = () => {
     const loadedCards = creditCardStore.getCards();
     const loadedAlerts = creditCardStore.getAlerts();
-    
+
     setCards(loadedCards);
     setAlerts(loadedAlerts);
     setTotalSpend(creditCardStore.getTotalSpend());
@@ -49,6 +49,7 @@ export default function Home() {
       creditCardStore.updateCard(editingCard.id, cardData);
       loadData();
       setEditingCard(null);
+      setShowForm(false);
     }
   };
 
@@ -109,6 +110,7 @@ export default function Home() {
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <CreditCardForm
+                    key={editingCard ? `edit-${editingCard.id}` : 'add-new'}
                     card={editingCard || undefined}
                     onSubmit={editingCard ? handleEditCard : handleAddCard}
                     onCancel={handleCancelForm}
@@ -168,7 +170,7 @@ export default function Home() {
                     )}
                   </TabsTrigger>
                 </TabsList>
-                
+
                 {unreadAlerts.length > 0 && (
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
