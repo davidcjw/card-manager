@@ -70,6 +70,103 @@ class CreditCardStore {
     }
   }
 
+  // Export data to JSON
+  exportData(): string {
+    const exportData = {
+      version: '1.0.0',
+      exportedAt: new Date().toISOString(),
+      cards: this.cards,
+      alerts: this.alerts,
+      paidPaymentPeriods: Array.from(this.paidPaymentPeriods)
+    };
+
+    return JSON.stringify(exportData, null, 2);
+  }
+
+  // Import data from JSON
+  importData(jsonData: string): { success: boolean; message: string } {
+    try {
+      const data = JSON.parse(jsonData);
+
+      // Validate the data structure
+      if (!data.cards || !Array.isArray(data.cards)) {
+        return { success: false, message: 'Invalid data format: cards array is missing' };
+      }
+
+      // Clear existing data
+      this.cards = [];
+      this.alerts = [];
+      this.paidPaymentPeriods.clear();
+
+      // Import cards
+      this.cards = data.cards.map((card: CreditCard) => ({
+        ...card,
+        // Ensure required fields exist
+        spendByCategory: card.spendByCategory || [],
+        earningRates: card.earningRates || [],
+        isActive: card.isActive !== undefined ? card.isActive : true
+      }));
+
+      // Import alerts if they exist
+      if (data.alerts && Array.isArray(data.alerts)) {
+        this.alerts = data.alerts;
+      }
+
+      // Import paid payment periods if they exist
+      if (data.paidPaymentPeriods && Array.isArray(data.paidPaymentPeriods)) {
+        this.paidPaymentPeriods = new Set(data.paidPaymentPeriods);
+      }
+
+      // Save to storage and regenerate alerts
+      this.saveToStorage();
+      this.generateAlerts();
+
+      return {
+        success: true,
+        message: `Successfully imported ${this.cards.length} cards and ${this.alerts.length} alerts`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to import data: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  }
+
+  // Download data as JSON file
+  downloadData(): void {
+    const data = this.exportData();
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `credit-cards-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Load data from file input
+  async loadFromFile(file: File): Promise<{ success: boolean; message: string }> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        const result = this.importData(content);
+        resolve(result);
+      };
+
+      reader.onerror = () => {
+        resolve({ success: false, message: 'Failed to read file' });
+      };
+
+      reader.readAsText(file);
+    });
+  }
+
   // Helper methods for new spend structure
   private getCardTotalSpend(card: CreditCard): number {
     return card.spendByCategory?.reduce((total, spend) => total + spend.amount, 0) || 0;

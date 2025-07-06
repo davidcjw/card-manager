@@ -11,6 +11,7 @@ import StatsCards from './components/dashboard/StatsCards';
 import CreditCardGrid from './components/dashboard/CreditCardGrid';
 import AlertsPanel from './components/dashboard/AlertsPanel';
 import CreditCardForm from './components/dashboard/CreditCardForm';
+import { DataManagerModal } from './components/dashboard/DataManagerModal';
 import { ThemeToggle } from './components/theme-toggle';
 
 export default function Home() {
@@ -106,6 +107,7 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
+              <DataManagerModal />
               <Dialog open={showForm} onOpenChange={setShowForm}>
                 <DialogTrigger asChild>
                   <Button>
@@ -138,6 +140,8 @@ export default function Home() {
             totalMiles={totalMiles}
           />
         </div>
+
+
 
         {/* Alerts and Cards */}
         <div className="grid gap-8 lg:grid-cols-4">
