@@ -133,8 +133,8 @@ export default function Home() {
           {/* Cards Section */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="active" className="w-full">
-              <div className="flex justify-between items-center mb-6">
-                <TabsList>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+                <TabsList className="w-full sm:w-auto">
                   <TabsTrigger value="active" className="flex items-center space-x-2">
                     <CreditCardIcon className="h-4 w-4" />
                     <span>Active Cards</span>
@@ -156,7 +156,7 @@ export default function Home() {
                 </TabsList>
 
                 {unreadAlerts.length > 0 && (
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <div className="flex items-center justify-center sm:justify-start space-x-2 text-sm text-muted-foreground">
                     <AlertCircle className="h-4 w-4" />
                     <span>{unreadAlerts.length} unread alerts</span>
                   </div>
