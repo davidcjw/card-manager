@@ -53,15 +53,17 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
     isActive: card?.isActive ?? true,
   });
 
-  const [earningRates, setEarningRates] = useState<EarningRate[]>(
-    card?.earningRates || [{ category: 'General', rate: 1.2, cap: undefined }]
+  const [earningRates, setEarningRates] = useState<({ category: string; rate: string; cap?: string })[]>(
+    card?.earningRates
+      ? card.earningRates.map(er => ({ ...er, rate: er.rate.toString(), cap: er.cap?.toString() }))
+      : [{ category: 'General', rate: '1.2', cap: undefined }]
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [earningRateErrors, setEarningRateErrors] = useState<Record<number, Record<string, string>>>({});
 
   const addEarningRate = () => {
-    setEarningRates([...earningRates, { category: '', rate: 1.2, cap: undefined }]);
+    setEarningRates([...earningRates, { category: '', rate: '1.2', cap: undefined }]);
   };
 
   const updateEarningRate = (index: number, field: keyof EarningRate, value: string | number | undefined) => {
@@ -94,7 +96,11 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
     earningRates.forEach((rate, index) => {
       if (rate.category.trim() !== '') {
         try {
-          earningRateSchema.parse(rate);
+          earningRateSchema.parse({
+            category: rate.category,
+            rate: Number(rate.rate),
+            cap: rate.cap !== undefined && rate.cap !== '' ? Number(rate.cap) : undefined,
+          });
         } catch (error) {
           if (error instanceof z.ZodError) {
             newEarningRateErrors[index] = {};
@@ -124,7 +130,11 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
     onSubmit({
       ...formData,
       lastResetDate: currentDate,
-      earningRates: earningRates.filter(rate => rate.category.trim() !== ''),
+      earningRates: earningRates.filter(rate => rate.category.trim() !== '').map(rate => ({
+        category: rate.category,
+        rate: Number(rate.rate),
+        cap: rate.cap !== undefined && rate.cap !== '' ? Number(rate.cap) : undefined,
+      })),
       spendByCategory: card?.spendByCategory || [],
     });
   };
@@ -136,6 +146,22 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
+
+  const CATEGORY_OPTIONS = [
+    'Dining',
+    'Travel',
+    'Beauty & Wellness',
+    'Groceries',
+    'Online Spend',
+    'Online Shopping',
+    'Offline Shopping',
+    'Paywave',
+    'Mobile Contactless',
+    'In-app Purchases',
+    'Pharmacies',
+    'Bakeries',
+    'General',
+  ];
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -224,6 +250,18 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                   )}
                 </div>
               </div>
+              <div className="flex items-center gap-3 mt-2">
+                <input
+                  id="isActive"
+                  type="checkbox"
+                  checked={formData.isActive}
+                  onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
+                  className="h-4 w-4 accent-primary"
+                />
+                <Label htmlFor="isActive" className="text-sm font-medium">
+                  Active (include this card in stats and alerts)
+                </Label>
+              </div>
               <div className="space-y-3">
                 <Label htmlFor="cardType" className="text-sm font-medium">
                   Card Type <span className="text-red-500">*</span>
@@ -264,6 +302,7 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                     id="creditLimit"
                     type="number"
                     value={formData.creditLimit || ''}
+                    placeholder='5000'
                     onChange={(e) => {
                       setFormData({ ...formData, creditLimit: e.target.value ? Number(e.target.value) : 0 });
                       if (errors.creditLimit) {
@@ -282,6 +321,7 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                   <Input
                     id="annualFee"
                     type="number"
+                    placeholder='196.60'
                     value={formData.annualFee || ''}
                     onChange={(e) => {
                       setFormData({ ...formData, annualFee: e.target.value ? Number(e.target.value) : 0 });
@@ -323,13 +363,13 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
               <div className="space-y-4">
                 {earningRates.map((rate, index) => (
                   <Card key={index} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-11 gap-2 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-11 gap-4 items-end">
                       <div className="space-y-2 md:col-span-4">
                         <Label className="text-sm font-medium">Category</Label>
-                        <Input
+                        <Select
                           value={rate.category}
-                          onChange={(e) => {
-                            updateEarningRate(index, 'category', e.target.value);
+                          onValueChange={(value) => {
+                            updateEarningRate(index, 'category', value);
                             if (earningRateErrors[index]?.category) {
                               const newErrors = { ...earningRateErrors };
                               delete newErrors[index]?.category;
@@ -339,9 +379,16 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                               setEarningRateErrors(newErrors);
                             }
                           }}
-                          placeholder="e.g., Dining, Travel"
-                          className={`h-9 ${earningRateErrors[index]?.category ? 'border-red-500' : ''}`}
-                        />
+                        >
+                          <SelectTrigger className={`h-9 ${earningRateErrors[index]?.category ? 'border-red-500' : ''}`}>
+                            <SelectValue placeholder="Choose one" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CATEGORY_OPTIONS.map((cat) => (
+                              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         {earningRateErrors[index]?.category && (
                           <p className="text-xs text-red-500">{earningRateErrors[index].category}</p>
                         )}
@@ -351,9 +398,10 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                         <Input
                           type="number"
                           step="0.1"
+                          width={2}
                           value={rate.rate}
                           onChange={(e) => {
-                            updateEarningRate(index, 'rate', Number(e.target.value));
+                            updateEarningRate(index, 'rate', e.target.value);
                             if (earningRateErrors[index]?.rate) {
                               const newErrors = { ...earningRateErrors };
                               delete newErrors[index]?.rate;
@@ -374,7 +422,7 @@ export default function CreditCardForm({ card, onSubmit, onCancel }: CreditCardF
                         <Input
                           type="number"
                           value={rate.cap || ''}
-                          onChange={(e) => updateEarningRate(index, 'cap', e.target.value ? Number(e.target.value) : undefined)}
+                          onChange={(e) => updateEarningRate(index, 'cap', e.target.value)}
                           placeholder="No cap"
                           className="h-9"
                         />

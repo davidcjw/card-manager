@@ -1,7 +1,7 @@
 # [Credit Card Manager](https://cardmanager.davidcjw.com/)
 
 <p align="center">
-  <img src="/public/credit-manager.gif" alt="Credit Card Manager Demo" width="700" />
+  <img src="/public/card-manager.gif" alt="Credit Card Manager Demo" width="700" />
 </p>
 
 A comprehensive credit card management application built with Next.js and TypeScript. Track your credit cards, monitor spending, and stay on top of important dates and limits.

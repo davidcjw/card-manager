@@ -4,9 +4,10 @@ import { CreditCard } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, CreditCard as CreditCardIcon, DollarSign, Plane } from "lucide-react";
+import { Edit, Trash2, CreditCard as CreditCardIcon, DollarSign, Plane, X as XIcon } from "lucide-react";
 import UpdateSpendDrawer from './UpdateSpendDrawer';
 import { CONFIG } from '@/lib/config';
+import { useState } from 'react';
 
 interface CreditCardGridProps {
   cards: CreditCard[];
@@ -14,9 +15,12 @@ interface CreditCardGridProps {
   onDelete: (cardId: string) => void;
   onUpdateSpend: (cardId: string, category: string, amount: number) => void;
   paidPaymentPeriods: Set<string>;
+  onUnmarkPaymentPaid: (card: CreditCard, paymentDate: Date) => void;
 }
 
-export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend, paidPaymentPeriods }: CreditCardGridProps) {
+export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend, paidPaymentPeriods, onUnmarkPaymentPaid }: CreditCardGridProps) {
+  const [expanded, setExpanded] = useState<{ [cardId: string]: boolean }>({});
+
   const getCardTypeIcon = (type: string) => {
     switch (type) {
       case 'miles': return <Plane className="h-4 w-4" />;
@@ -126,9 +130,14 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
         const totalSpend = calculateTotalSpend(card);
         const totalMiles = calculateTotalMilesEarned(card);
         const totalCashback = calculateTotalCashbackEarned(card);
+        // Sort earning rates by rate descending
+        const sortedEarningRates = [...card.earningRates].sort((a, b) => b.rate - a.rate);
 
         return (
-          <Card key={card.id} className="hover:shadow-lg transition-shadow flex flex-col">
+          <Card
+            key={card.id}
+            className="hover:shadow-lg transition-shadow flex flex-col"
+          >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -158,7 +167,7 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                   {card.cardType}
                 </Badge>
                 {!card.isActive && (
-                  <Badge variant="outline">Inactive</Badge>
+                  <Badge className="bg-rose-500 text-white border-rose-500">Inactive</Badge>
                 )}
               </div>
             </CardHeader>
@@ -229,6 +238,18 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                       </svg>
                       Payment Paid
                     </Badge>
+                    <button
+                      type="button"
+                      className="ml-1 p-1 rounded hover:bg-gray-200 transition-colors"
+                      title="Remove Payment Paid status"
+                      aria-label="Remove Payment Paid status"
+                      onClick={() => {
+                        const paymentDate = getNextPaymentDate(card);
+                        onUnmarkPaymentPaid(card, paymentDate);
+                      }}
+                    >
+                      <XIcon className="h-4 w-4 text-gray-500 hover:text-red-500" />
+                    </button>
                   </div>
                 ) : (
                   <Badge className={getPaymentStatusColor(daysUntilPayment)}>
@@ -239,9 +260,11 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
 
               {/* Earning Rates */}
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Earning Rates</p>
+                <p className="text-sm text-muted-foreground flex items-center">
+                  Earning Rates
+                </p>
                 <div className="space-y-1">
-                  {card.earningRates.slice(0, 2).map((rate, index) => (
+                  {(expanded[card.id] ? sortedEarningRates : sortedEarningRates.slice(0, 2)).map((rate, index) => (
                     <div key={index} className="flex justify-between text-sm">
                       <span>{rate.category}</span>
                       <span className="font-medium">
@@ -249,10 +272,23 @@ export default function CreditCardGrid({ cards, onEdit, onDelete, onUpdateSpend,
                       </span>
                     </div>
                   ))}
-                  {card.earningRates.length > 2 && (
-                    <p className="text-xs text-muted-foreground">
-                      +{card.earningRates.length - 2} more rates
-                    </p>
+                  {!expanded[card.id] && sortedEarningRates.length > 2 && (
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground underline hover:text-blue-600 mt-1"
+                      onClick={() => setExpanded(prev => ({ ...prev, [card.id]: true }))}
+                    >
+                      +{sortedEarningRates.length - 2} more rates
+                    </button>
+                  )}
+                  {expanded[card.id] && sortedEarningRates.length > 2 && (
+                    <button
+                      type="button"
+                      className="text-xs text-muted-foreground underline hover:text-blue-600 mt-1"
+                      onClick={() => setExpanded(prev => ({ ...prev, [card.id]: false }))}
+                    >
+                      Show Less
+                    </button>
                   )}
                 </div>
               </div>

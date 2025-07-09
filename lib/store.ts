@@ -507,28 +507,36 @@ class CreditCardStore {
     return `${card.id}_${paymentDate.getFullYear()}_${paymentDate.getMonth()}`;
   }
 
+  // Remove a paid payment period
+  unmarkPaymentPeriodAsPaid(cardId: string, paymentDate: Date): void {
+    const paymentPeriodKey = this.getPaymentPeriodKey({ id: cardId } as CreditCard, paymentDate);
+    this.paidPaymentPeriods.delete(paymentPeriodKey);
+    this.saveToStorage();
+    this.generateAlerts();
+  }
+
   // Utility methods
   getTotalSpend(): number {
-    return this.cards.reduce((total, card) => total + this.getCardTotalSpend(card), 0);
+    return this.cards.filter(card => card.isActive).reduce((total, card) => total + this.getCardTotalSpend(card), 0);
   }
 
   getTotalMilesEarned(): number {
-    return this.cards.reduce((total, card) => total + this.getCardMilesEarned(card), 0);
+    return this.cards.filter(card => card.isActive).reduce((total, card) => total + this.getCardMilesEarned(card), 0);
   }
 
   getTotalCashbackEarned(): number {
-    return this.cards.reduce((total, card) => total + this.getCardCashbackEarned(card), 0);
+    return this.cards.filter(card => card.isActive).reduce((total, card) => total + this.getCardCashbackEarned(card), 0);
   }
 
   getMilesCardsStats(): { totalSpend: number; totalMiles: number } {
-    const milesCards = this.cards.filter(card => card.cardType === 'miles');
+    const milesCards = this.cards.filter(card => card.isActive && card.cardType === 'miles');
     const totalSpend = milesCards.reduce((total, card) => total + this.getCardTotalSpend(card), 0);
     const totalMiles = milesCards.reduce((total, card) => total + this.getCardMilesEarned(card), 0);
     return { totalSpend, totalMiles };
   }
 
   getCashbackCardsStats(): { totalSpend: number; totalCashback: number } {
-    const cashbackCards = this.cards.filter(card => card.cardType === 'cashback');
+    const cashbackCards = this.cards.filter(card => card.isActive && card.cardType === 'cashback');
     const totalSpend = cashbackCards.reduce((total, card) => total + this.getCardTotalSpend(card), 0);
     const totalCashback = cashbackCards.reduce((total, card) => total + this.getCardCashbackEarned(card), 0);
     return { totalSpend, totalCashback };
